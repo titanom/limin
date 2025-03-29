@@ -8,6 +8,8 @@ Features:
 
 ✅ Timestamping of text completions and measuring generation duration.
 
+✅ Pretty printing of conversations.
+
 ✅ Improved type safety and type inference.
 
 ## Installation
