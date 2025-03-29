@@ -53,6 +53,34 @@ class Conversation:
 
         self.messages.append(message)
 
+    def to_pretty_string(
+        self,
+        system_color: str = "\033[1;36m",
+        user_color: str = "\033[1;32m",
+        assistant_color: str = "\033[1;35m",
+    ) -> str:
+        pretty_lines = []
+
+        for message in self.messages:
+            if message.role == "system":
+                color_code = system_color
+            elif message.role == "user":
+                color_code = user_color
+            elif message.role == "assistant":
+                color_code = assistant_color
+
+            # Reset color code
+            reset_code = "\033[0m"
+
+            pretty_lines.append(f"{color_code}{message.role.capitalize()}{reset_code}")
+
+            separator_length = len(message.role) + 2  # +2 for some extra space
+            pretty_lines.append("-" * separator_length)
+
+            pretty_lines.append(f"{message.content}\n")
+
+        return "\n".join(pretty_lines)
+
     @property
     def openai_messages(self) -> list[ChatCompletionMessageParam]:
         return [message.openai_message for message in self.messages]
