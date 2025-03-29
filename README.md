@@ -2,6 +2,16 @@
 
 A Python library for interacting with OpenAI-compatible LLM APIs.
 
+Features:
+
+✅ Parallel generation of text completions.
+
+✅ Timestamping of text completions and measuring generation duration.
+
+✅ Pretty printing of conversations.
+
+✅ Improved type safety and type inference.
+
 ## Installation
 
 Install the library using pip:
@@ -70,12 +80,15 @@ You can generate a single text completion for a conversation by calling the `gen
 ```python
 from limin import generate_text_completion_for_conversation
 
-completion = await generate_text_completion_for_conversation([
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "What is the capital of France?"},
-    {"role": "assistant", "content": "The capital of France is Paris."},
-    {"role": "user", "content": "What is the capital of Germany?"},
-])
+conversation = Conversation(
+    messages=[
+        Message(role="system", content="You are a helpful assistant."),
+        Message(role="user", content="What is the capital of France?"),
+        Message(role="assistant", content="The capital of France is Paris."),
+        Message(role="user", content="What is the capital of Germany?"),
+    ]
+)
+completion = await generate_text_completion_for_conversation(conversation)
 print(completion.message)
 ```
 
@@ -117,15 +130,19 @@ You can also generate multiple text completions for a list of conversations by c
 ```python
 from limin import generate_text_completions_for_conversations
 
-first_conversation = [
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "What is the capital of France?"},
-]
+first_conversation = Conversation(
+    messages=[
+        Message(role="system", content="You are a helpful assistant."),
+        Message(role="user", content="What is the capital of France?"),
+    ]
+)
 
-second_conversation = [
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "What is the capital of Germany?"},
-]
+second_conversation = Conversation(
+    messages=[
+        Message(role="system", content="You are a helpful assistant."),
+        Message(role="user", content="What is the capital of Germany?"),
+    ]
+)
 
 completions = await generate_text_completions_for_conversations([
     first_conversation,
@@ -138,6 +155,26 @@ for completion in completions:
 
 Note that both the `generate_text_completions` and `generate_text_completions_for_conversations` functions will show a progress bar if the `show_progress` parameter is set to `True` (which it is by default).
 You can suppress this by setting the `show_progress` parameter to `False`.
+
+## Important Classes
+
+### The Message Class
+
+The `Message` class is a simple dataclass that represents a message in a conversation.
+It has the following attributes:
+
+- `role`: The role of the message (either "system", "user", or "assistant").
+- `content`: The content of the message.
+
+### The Conversation Class
+
+The `Conversation` class represents a conversation between a user and an assistant.
+It contains the `messages` attribute, which is a list of `Message` objects.
+
+You can add a message to the conversation using the `add_message` method.
+This will intelligently check whether the message has the correct role and then add the message to the conversation.
+
+Additionally, the `Conversation` class has a `to_pretty_string` method that returns a pretty string representation of the conversation with colored roles and separators.
 
 ### The TextCompletion Class
 
