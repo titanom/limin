@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import dataclass
 import time
-from typing import Literal, TypeVar
+from typing import Literal, TypeVar, cast
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from tqdm import tqdm
@@ -23,15 +23,14 @@ class Message:
 
     @property
     def openai_message(self) -> ChatCompletionMessageParam:
-        return {"role": self.role, "content": self.content}
+        return cast(
+            ChatCompletionMessageParam, {"role": self.role, "content": self.content}
+        )
 
 
 class Conversation:
-    def __init__(self, messages: list[Message] = None):
-        if messages is None:
-            messages = []
-
-        self.messages = messages
+    def __init__(self, messages: list[Message] | None = None):
+        self.messages = messages or []
 
     def add_message(self, message: Message):
         last_message = get_last_element(self.messages)
