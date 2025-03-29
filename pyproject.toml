@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "limin"
-version = "0.3.0"
+version = "0.3.2"
 description = "A Python library for interacting with OpenAI-compatible LLM APIs."
 authors = [
     { name = "Titanom Solutions", email = "infrastructure@titanom.com" },
@@ -15,6 +15,9 @@ dependencies = [
     "tqdm==4.67.1",
 ]
 requires-python = ">=3.10"
+
+[tool.setuptools]
+packages = ["limin"]
 
 [tool.setuptools.package-data]
 limin = ["py.typed"]
