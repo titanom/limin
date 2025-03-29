@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "limin"
+version = "0.1.1"
+description = "A Python library for interacting with OpenAI-compatible LLM APIs."
+authors = [
+    { name = "Titanom Solutions", email = "infrastructure@titanom.com" },
+]
+readme = "README.md"
+dependencies = [
+    "openai==1.69.0",
+    "tqdm==4.67.1",
+]
+requires-python = ">=3.10"
