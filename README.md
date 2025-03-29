@@ -1,4 +1,4 @@
-# llmc
+# llmi
 
 A Python library for interacting with OpenAI-compatible LLM APIs.
 
@@ -16,7 +16,7 @@ Additionally, you will need to set the `OPENAI_API_KEY` environment variable to 
 For example, you can retrieve a text completion for a single user prompt by calling the `generate_text_completion` function:
 
 ```python
-from llmc import generate_text_completion
+from llmi import generate_text_completion
 
 completion = await generate_text_completion("What is the capital of France?")
 print(completion.message)
@@ -25,7 +25,7 @@ print(completion.message)
 If you want to use this in a script, you can do the following:
 
 ```python
-from llmc import generate_text_completion
+from llmi import generate_text_completion
 
 
 async def main():
@@ -53,7 +53,7 @@ The capital of France is Paris.
 You can generate a single text completion for a user prompt by calling the `generate_text_completion` function:
 
 ```python
-from llmc import generate_text_completion
+from llmi import generate_text_completion
 
 completion = await generate_text_completion("What is the capital of France?")
 print(completion.message)
@@ -62,7 +62,7 @@ print(completion.message)
 You can generate a single text completion for a conversation by calling the `generate_text_completion_for_conversation` function:
 
 ```python
-from llmc import generate_text_completion_for_conversation
+from llmi import generate_text_completion_for_conversation
 
 completion = await generate_text_completion_for_conversation([
     {"role": "system", "content": "You are a helpful assistant."},
@@ -78,7 +78,7 @@ print(completion.message)
 You can generate multiple text completions for a list of user prompts by calling the `generate_text_completions` function:
 
 ```python
-from llmc import generate_text_completions
+from llmi import generate_text_completions
 
 completions = await generate_text_completions([
     "What is the capital of France?",
@@ -109,7 +109,7 @@ for completion in completions:
 You can also generate multiple text completions for a list of conversations by calling the `generate_text_completions_for_conversations` function:
 
 ```python
-from llmc import generate_text_completions_for_conversations
+from llmi import generate_text_completions_for_conversations
 
 first_conversation = [
     {"role": "system", "content": "You are a helpful assistant."},
