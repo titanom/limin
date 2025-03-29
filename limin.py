@@ -1,14 +1,67 @@
 import asyncio
 from dataclasses import dataclass
 import time
+from typing import Literal, TypeVar
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from tqdm import tqdm
 
 
+T = TypeVar("T")
+
+
+def get_last_element(list: list[T]) -> T | None:
+    if len(list) == 0:
+        return None
+    return list[-1]
+
+
+@dataclass
+class Message:
+    role: Literal["system", "user", "assistant"]
+    content: str
+
+    @property
+    def openai_message(self) -> ChatCompletionMessageParam:
+        return {"role": self.role, "content": self.content}
+
+
+class Conversation:
+    def __init__(self, messages: list[Message] = None):
+        if messages is None:
+            messages = []
+
+        self.messages = messages
+
+    def add_message(self, message: Message):
+        last_message = get_last_element(self.messages)
+
+        if last_message is None:
+            if message.role == "assistant":
+                raise ValueError("The first message must be a system or user message")
+
+            self.messages.append(message)
+            return
+
+        if last_message.role == "system" and message.role != "user":
+            raise ValueError("System message must be followed by a user message")
+
+        if last_message.role == "assistant" and message.role != "user":
+            raise ValueError("Assistant message must be followed by a user message")
+
+        if last_message.role == "user" and message.role != "assistant":
+            raise ValueError("User message must be followed by an assistant message")
+
+        self.messages.append(message)
+
+    @property
+    def openai_messages(self) -> list[ChatCompletionMessageParam]:
+        return [message.openai_message for message in self.messages]
+
+
 @dataclass
 class TextCompletion:
-    conversation: list[ChatCompletionMessageParam]
+    conversation: Conversation
     model: str
     message: str
     start_time: float
@@ -21,7 +74,7 @@ class TextCompletion:
 
 
 async def generate_text_completion_for_conversation(
-    conversation: list[ChatCompletionMessageParam],
+    conversation: Conversation,
     *,
     model: str = "gpt-4o",
     temperature: float = 0.7,
@@ -31,7 +84,7 @@ async def generate_text_completion_for_conversation(
     """
     Generate a text completion for a conversation.
 
-    :param conversation: The conversation (i.e. a list of messages) to generate a completion for.
+    :param conversation: The conversation to generate a completion for.
     :param model: The model to use for the completion.
     :param temperature: The temperature to use for the completion.
     :param api_key: The API key to use for the completion.
@@ -42,7 +95,7 @@ async def generate_text_completion_for_conversation(
 
     start_time = time.time()
     completion = await client.chat.completions.create(
-        model=model, messages=conversation, temperature=temperature
+        model=model, messages=conversation.openai_messages, temperature=temperature
     )
     end_time = time.time()
 
@@ -79,13 +132,13 @@ async def generate_text_completion(
     :param base_url: The base URL to use for the completion.
     :return: A TextCompletion object.
     """
-    messages: list[ChatCompletionMessageParam] = []
+    conversation = Conversation()
     if system_prompt:
-        messages.append({"role": "system", "content": system_prompt})
-    messages.append({"role": "user", "content": user_prompt})
+        conversation.add_message(Message(role="system", content=system_prompt))
+    conversation.add_message(Message(role="user", content=user_prompt))
 
     return await generate_text_completion_for_conversation(
-        messages,
+        conversation,
         model=model,
         temperature=temperature,
         api_key=api_key,
@@ -94,7 +147,7 @@ async def generate_text_completion(
 
 
 async def generate_text_completions_for_conversations(
-    conversations: list[list[ChatCompletionMessageParam]],
+    conversations: list[Conversation],
     n_parallel: int = 5,
     *,
     model: str = "gpt-4o",
@@ -104,7 +157,7 @@ async def generate_text_completions_for_conversations(
     base_url: str | None = None,
 ) -> list[TextCompletion]:
     """
-    Generate a list of text completions for a list of conversations (where each conversation is a list of messages) with support for parallel generation.
+    Generate a list of text completions for a list of conversations with support for parallel generation.
 
     :param conversations: The list of conversations to generate completions for.
     :param n_parallel: The number of completions to generate in parallel.
@@ -121,19 +174,19 @@ async def generate_text_completions_for_conversations(
         progress_bar = tqdm(total=len(conversations))
 
     for i in range(0, len(conversations), n_parallel):
-        messages_batch = conversations[i : i + n_parallel]
+        conversations_batch = conversations[i : i + n_parallel]
 
         tasks = [
             asyncio.create_task(
                 generate_text_completion_for_conversation(
-                    message_list,
+                    conversation,
                     model=model,
                     temperature=temperature,
                     api_key=api_key,
                     base_url=base_url,
                 )
             )
-            for message_list in messages_batch
+            for conversation in conversations_batch
         ]
 
         completions_batch = await asyncio.gather(*tasks)
@@ -172,17 +225,17 @@ async def generate_text_completions(
     :param base_url: The base URL to use for the completions.
     :return: A list of TextCompletion objects.
     """
-    messages: list[list[ChatCompletionMessageParam]] = []
+    conversations: list[Conversation] = []
 
     for user_prompt in user_prompts:
-        prompt_messages: list[ChatCompletionMessageParam] = []
+        conversation = Conversation()
         if system_prompt:
-            prompt_messages.append({"role": "system", "content": system_prompt})
-        prompt_messages.append({"role": "user", "content": user_prompt})
-        messages.append(prompt_messages)
+            conversation.add_message(Message(role="system", content=system_prompt))
+        conversation.add_message(Message(role="user", content=user_prompt))
+        conversations.append(conversation)
 
     return await generate_text_completions_for_conversations(
-        messages,
+        conversations,
         n_parallel=n_parallel,
         model=model,
         temperature=temperature,
