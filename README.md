@@ -12,6 +12,8 @@ Features:
 
 ✅ Improved type safety and type inference.
 
+✅ Working with log probabilities of tokens (including pretty printing).
+
 ## Installation
 
 Install the library using pip:
@@ -155,6 +157,41 @@ for completion in completions:
 
 Note that both the `generate_text_completions` and `generate_text_completions_for_conversations` functions will show a progress bar if the `show_progress` parameter is set to `True` (which it is by default).
 You can suppress this by setting the `show_progress` parameter to `False`.
+
+### Extracting Log Probabilities
+
+You can extract the log probabilities of the tokens by accessing the `token_log_probs` attribute of the `TextCompletion` object.
+You will need to pass the `log_probs` parameter to the generation function together with the `top_log_probs` parameter to get the most likely tokens:
+
+```python
+completion = await generate_text_completion(
+    "What is 2+2?",
+    log_probs=True,
+    top_log_probs=10,
+)
+print(completion.token_log_probs)
+```
+
+This will return a list of `TokenLogProb` objects, which have the following attributes:
+
+- `token`: The token.
+- `log_prob`: The log probability of the token.
+
+You can pretty print the log probabilities by calling the `to_pretty_log_probs_string` method of the `TextCompletion` object:
+
+```python
+print(completion.to_pretty_log_probs_string(show_probabilities=True))
+```
+
+This will return a nicely colored string with the log probabilities of the tokens.
+
+You can also access the full list of log probabilities by accessing the `full_token_log_probs` attribute of the `TextCompletion` object:
+
+```python
+print(completion.full_token_log_probs)
+```
+
+This will return a list of lists of `TokenLogProb` objects (for each token position the `top_log_probs` number of most likely tokens).
 
 ## Important Classes
 
