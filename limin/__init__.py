@@ -1,4 +1,5 @@
 import asyncio
+import os
 from dataclasses import dataclass
 import math
 import time
@@ -82,6 +83,8 @@ class Conversation:
         pretty_lines = []
 
         for message in self.messages:
+            color_code = "\033[0m"  # default to reset code
+
             if message.role == "system":
                 color_code = system_color
             elif message.role == "user":
@@ -168,6 +171,28 @@ class TextCompletion:
         return "".join(result)
 
 
+_CACHED_ENV_API_KEY: str | None = None
+
+
+def get_api_key(api_key: str | None = None) -> str | None:
+    """
+    get the API key from the provided parameter or from the environment variable.
+    uses caching to avoid repeated environment variable lookups
+
+    :param api_key: the API key provided as a parameter
+    :return: the API key to use, or None if not available
+    """
+    global _CACHED_ENV_API_KEY
+
+    if api_key is not None:
+        return api_key
+
+    if _CACHED_ENV_API_KEY is None:
+        _CACHED_ENV_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+    return _CACHED_ENV_API_KEY
+
+
 async def generate_text_completion_for_conversation(
     conversation: Conversation,
     *,
@@ -186,11 +211,13 @@ async def generate_text_completion_for_conversation(
     :param temperature: The temperature to use for the completion.
     :param log_probs: Whether to log the probabilities of the tokens.
     :param top_log_probs: The number of top log probabilities to return.
-    :param api_key: The API key to use for the completion.
+    :param api_key: The API key to use for the completion. If None, will try to use OPENAI_API_KEY environment variable.
     :param base_url: The base URL to use for the completion.
     :return: A TextCompletion object.
     """
-    client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+    final_api_key = get_api_key(api_key)
+
+    client = AsyncOpenAI(api_key=final_api_key, base_url=base_url)
 
     start_time = time.time()
     completion = await client.chat.completions.create(
@@ -253,12 +280,12 @@ async def generate_text_completion(
     :param temperature: The temperature to use for the completion.
     :param log_probs: Whether to log the probabilities of the tokens.
     :param top_log_probs: The number of top log probabilities to return.
-    :param api_key: The API key to use for the completion.
+    :param api_key: The API key to use for the completion. If None, will try to use OPENAI_API_KEY environment variable.
     :param base_url: The base URL to use for the completion.
     :return: A TextCompletion object.
     """
     conversation = Conversation()
-    if system_prompt:
+    if system_prompt is not None:
         conversation.add_message(Message(role="system", content=system_prompt))
     conversation.add_message(Message(role="user", content=user_prompt))
 
@@ -295,11 +322,12 @@ async def generate_text_completions_for_conversations(
     :param log_probs: Whether to log the probabilities of the tokens.
     :param top_log_probs: The number of top log probabilities to return.
     :param show_progress: Whether to show a progress bar.
-    :param api_key: The API key to use for the completions.
+    :param api_key: The API key to use for the completions. If None, will try to use OPENAI_API_KEY environment variable.
     :param base_url: The base URL to use for the completions.
     :return: A list of TextCompletion objects.
     """
     completions = []
+    progress_bar = None
 
     if show_progress:
         progress_bar = tqdm(total=len(conversations))
@@ -325,10 +353,10 @@ async def generate_text_completions_for_conversations(
         completions_batch = await asyncio.gather(*tasks)
         completions.extend(completions_batch)
 
-        if show_progress:
+        if show_progress and progress_bar is not None:
             progress_bar.update(len(completions_batch))
 
-    if show_progress:
+    if show_progress and progress_bar is not None:
         progress_bar.close()
 
     return completions
@@ -358,7 +386,7 @@ async def generate_text_completions(
     :param log_probs: Whether to log the probabilities of the tokens.
     :param top_log_probs: The number of top log probabilities to return.
     :param show_progress: Whether to show a progress bar.
-    :param api_key: The API key to use for the completions.
+    :param api_key: The API key to use for the completions. If None, will try to use OPENAI_API_KEY environment variable.
     :param base_url: The base URL to use for the completions.
     :return: A list of TextCompletion objects.
     """
@@ -366,7 +394,7 @@ async def generate_text_completions(
 
     for user_prompt in user_prompts:
         conversation = Conversation()
-        if system_prompt:
+        if system_prompt is not None:
             conversation.add_message(Message(role="system", content=system_prompt))
         conversation.add_message(Message(role="user", content=user_prompt))
         conversations.append(conversation)
