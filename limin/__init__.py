@@ -11,6 +11,12 @@ from tqdm import tqdm
 T = TypeVar("T")
 
 
+def get_first_element(list: list[T]) -> T | None:
+    if len(list) == 0:
+        return None
+    return list[0]
+
+
 def get_last_element(list: list[T]) -> T | None:
     if len(list) == 0:
         return None
@@ -140,14 +146,11 @@ class TextCompletion:
 
         result = []
         for token_log_prob in self.token_log_probs:
-            # Convert log probability to probability (0 to 1)
-            prob = math.exp(token_log_prob.log_prob)
-
-            if prob < 0.25:
+            if token_log_prob.prob < 0.25:
                 color_code = "\033[1;31m"  # Dark red
-            elif prob < 0.5:
+            elif token_log_prob.prob < 0.5:
                 color_code = "\033[1;33m"  # Yellow
-            elif prob < 0.75:
+            elif token_log_prob.prob < 0.75:
                 color_code = "\033[1;32m"  # Light green
             else:
                 color_code = "\033[1;92m"  # Dark green
@@ -157,7 +160,7 @@ class TextCompletion:
 
             if show_probabilities:
                 result.append(
-                    f"{color_code}{token_log_prob.token}[{round(prob, 2)}]{reset_code}"
+                    f"{color_code}{token_log_prob.token}[{round(token_log_prob.prob, 2)}]{reset_code}"
                 )
             else:
                 result.append(f"{color_code}{token_log_prob.token}{reset_code}")
@@ -199,7 +202,9 @@ async def generate_text_completion_for_conversation(
     )
     end_time = time.time()
 
-    first_choice = completion.choices[0]
+    first_choice = get_first_element(completion.choices)
+    if first_choice is None:
+        raise ValueError("No choices returned from the completion.")
 
     message_content = first_choice.message.content
 
