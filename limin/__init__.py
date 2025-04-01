@@ -111,12 +111,58 @@ class TextCompletion:
     """
     A list containing the most likely tokens and their log probabilities for each token position in the message.
     """
-    token_log_probs: list[list[TokenLogProb]] | None = None
+    full_token_log_probs: list[list[TokenLogProb]] | None = None
 
     @property
     def duration(self) -> float:
         """The duration of the generation in seconds."""
         return self.end_time - self.start_time
+
+    @property
+    def token_log_probs(self) -> list[TokenLogProb] | None:
+        if self.full_token_log_probs is None:
+            return None
+
+        return [
+            token_log_probs_position[0]
+            for token_log_probs_position in self.full_token_log_probs
+        ]
+
+    def to_pretty_log_probs_string(self, show_probabilities: bool = False) -> str:
+        """
+        Returns a pretty string representation of the token log probabilities.
+        Tokens are colored from dark red (low probability) to dark green (high probability).
+
+        :param show_probabilities: Whether to show the probability value after each token.
+        """
+        if self.token_log_probs is None:
+            return "No token log probabilities available."
+
+        result = []
+        for token_log_prob in self.token_log_probs:
+            # Convert log probability to probability (0 to 1)
+            prob = math.exp(token_log_prob.log_prob)
+
+            if prob < 0.25:
+                color_code = "\033[1;31m"  # Dark red
+            elif prob < 0.5:
+                color_code = "\033[1;33m"  # Yellow
+            elif prob < 0.75:
+                color_code = "\033[1;32m"  # Light green
+            else:
+                color_code = "\033[1;92m"  # Dark green
+
+            # Reset color code
+            reset_code = "\033[0m"
+
+            if show_probabilities:
+                result.append(
+                    f"{color_code}{token_log_prob.token}[{round(prob, 2)}]{reset_code}"
+                )
+            else:
+                result.append(f"{color_code}{token_log_prob.token}{reset_code}")
+
+        return "".join(result)
 
 
 async def generate_text_completion_for_conversation(
@@ -178,7 +224,7 @@ async def generate_text_completion_for_conversation(
         message=message_content,
         start_time=start_time,
         end_time=end_time,
-        token_log_probs=token_log_probs,
+        full_token_log_probs=token_log_probs,
     )
 
 
