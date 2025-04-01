@@ -38,6 +38,9 @@ class TokenLogProb:
     def prob(self) -> float:
         return math.exp(self.log_prob)
 
+    def __repr__(self) -> str:
+        return f"TokenLogProb(token={self.token!r}, prob={round(self.prob, 2)})"
+
 
 class Conversation:
     def __init__(self, messages: list[Message] | None = None):
@@ -104,7 +107,11 @@ class TextCompletion:
     message: str
     start_time: float
     end_time: float
-    token_log_probs: list[TokenLogProb] | None = None
+
+    """
+    A list containing the most likely tokens and their log probabilities for each token position in the message.
+    """
+    token_log_probs: list[list[TokenLogProb]] | None = None
 
     @property
     def duration(self) -> float:
@@ -154,8 +161,13 @@ async def generate_text_completion_for_conversation(
     token_log_probs = None
     if first_choice.logprobs is not None:
         token_log_probs = [
-            TokenLogProb(token=token_log_prob.token, log_prob=token_log_prob.logprob)
-            for token_log_prob in first_choice.logprobs.content
+            [
+                TokenLogProb(
+                    token=token_log_prob.token, log_prob=token_log_prob.logprob
+                )
+                for token_log_prob in log_probs_content.top_logprobs
+            ]
+            for log_probs_content in first_choice.logprobs.content
         ]
 
     return TextCompletion(
