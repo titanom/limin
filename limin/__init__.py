@@ -161,7 +161,7 @@ async def generate_text_completion_for_conversation(
         raise ValueError("No message content returned from the completion.")
 
     token_log_probs = None
-    if first_choice.logprobs is not None:
+    if first_choice.logprobs is not None and first_choice.logprobs.content is not None:
         token_log_probs = [
             [
                 TokenLogProb(
