@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+import math
 import time
 from typing import Literal, TypeVar, cast
 from openai import AsyncOpenAI
@@ -26,6 +27,16 @@ class Message:
         return cast(
             ChatCompletionMessageParam, {"role": self.role, "content": self.content}
         )
+
+
+@dataclass
+class TokenLogProb:
+    token: str
+    log_prob: float
+
+    @property
+    def prob(self) -> float:
+        return math.exp(self.log_prob)
 
 
 class Conversation:
@@ -93,6 +104,7 @@ class TextCompletion:
     message: str
     start_time: float
     end_time: float
+    token_log_probs: list[TokenLogProb] | None = None
 
     @property
     def duration(self) -> float:
@@ -105,6 +117,8 @@ async def generate_text_completion_for_conversation(
     *,
     model: str = "gpt-4o",
     temperature: float = 0.7,
+    log_probs: bool = False,
+    top_log_probs: int | None = None,
     api_key: str | None = None,
     base_url: str | None = None,
 ) -> TextCompletion:
@@ -122,13 +136,27 @@ async def generate_text_completion_for_conversation(
 
     start_time = time.time()
     completion = await client.chat.completions.create(
-        model=model, messages=conversation.openai_messages, temperature=temperature
+        model=model,
+        messages=conversation.openai_messages,
+        temperature=temperature,
+        logprobs=log_probs,
+        top_logprobs=top_log_probs,
     )
     end_time = time.time()
 
-    message_content = completion.choices[0].message.content
+    first_choice = completion.choices[0]
+
+    message_content = first_choice.message.content
+
     if message_content is None:
         raise ValueError("No message content returned from the completion.")
+
+    token_log_probs = None
+    if first_choice.logprobs is not None:
+        token_log_probs = [
+            TokenLogProb(token=token_log_prob.token, log_prob=token_log_prob.logprob)
+            for token_log_prob in first_choice.logprobs.content
+        ]
 
     return TextCompletion(
         conversation=conversation,
@@ -136,6 +164,7 @@ async def generate_text_completion_for_conversation(
         message=message_content,
         start_time=start_time,
         end_time=end_time,
+        token_log_probs=token_log_probs,
     )
 
 
