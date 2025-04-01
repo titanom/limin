@@ -135,6 +135,8 @@ async def generate_text_completion_for_conversation(
     :param conversation: The conversation to generate a completion for.
     :param model: The model to use for the completion.
     :param temperature: The temperature to use for the completion.
+    :param log_probs: Whether to log the probabilities of the tokens.
+    :param top_log_probs: The number of top log probabilities to return.
     :param api_key: The API key to use for the completion.
     :param base_url: The base URL to use for the completion.
     :return: A TextCompletion object.
@@ -186,6 +188,8 @@ async def generate_text_completion(
     model: str = "gpt-4o",
     system_prompt: str | None = None,
     temperature: float = 0.7,
+    log_probs: bool = False,
+    top_log_probs: int | None = None,
     api_key: str | None = None,
     base_url: str | None = None,
 ) -> TextCompletion:
@@ -196,6 +200,8 @@ async def generate_text_completion(
     :param model: The model to use for the completion.
     :param system_prompt: The system prompt to use for the completion.
     :param temperature: The temperature to use for the completion.
+    :param log_probs: Whether to log the probabilities of the tokens.
+    :param top_log_probs: The number of top log probabilities to return.
     :param api_key: The API key to use for the completion.
     :param base_url: The base URL to use for the completion.
     :return: A TextCompletion object.
@@ -209,6 +215,8 @@ async def generate_text_completion(
         conversation,
         model=model,
         temperature=temperature,
+        log_probs=log_probs,
+        top_log_probs=top_log_probs,
         api_key=api_key,
         base_url=base_url,
     )
@@ -220,6 +228,8 @@ async def generate_text_completions_for_conversations(
     *,
     model: str = "gpt-4o",
     temperature: float = 0.7,
+    log_probs: bool = False,
+    top_log_probs: int | None = None,
     show_progress: bool = True,
     api_key: str | None = None,
     base_url: str | None = None,
@@ -231,6 +241,8 @@ async def generate_text_completions_for_conversations(
     :param n_parallel: The number of completions to generate in parallel.
     :param model: The model to use for the completions.
     :param temperature: The temperature to use for the completions.
+    :param log_probs: Whether to log the probabilities of the tokens.
+    :param top_log_probs: The number of top log probabilities to return.
     :param show_progress: Whether to show a progress bar.
     :param api_key: The API key to use for the completions.
     :param base_url: The base URL to use for the completions.
@@ -250,6 +262,8 @@ async def generate_text_completions_for_conversations(
                     conversation,
                     model=model,
                     temperature=temperature,
+                    log_probs=log_probs,
+                    top_log_probs=top_log_probs,
                     api_key=api_key,
                     base_url=base_url,
                 )
@@ -276,6 +290,8 @@ async def generate_text_completions(
     model: str = "gpt-4o",
     system_prompt: str | None = None,
     temperature: float = 0.7,
+    log_probs: bool = False,
+    top_log_probs: int | None = None,
     show_progress: bool = True,
     api_key: str | None = None,
     base_url: str | None = None,
@@ -288,6 +304,8 @@ async def generate_text_completions(
     :param model: The model to use for the completions.
     :param system_prompt: The system prompt to use for the completions.
     :param temperature: The temperature to use for the completions.
+    :param log_probs: Whether to log the probabilities of the tokens.
+    :param top_log_probs: The number of top log probabilities to return.
     :param show_progress: Whether to show a progress bar.
     :param api_key: The API key to use for the completions.
     :param base_url: The base URL to use for the completions.
@@ -307,6 +325,8 @@ async def generate_text_completions(
         n_parallel=n_parallel,
         model=model,
         temperature=temperature,
+        log_probs=log_probs,
+        top_log_probs=top_log_probs,
         show_progress=show_progress,
         api_key=api_key,
         base_url=base_url,
