@@ -4,6 +4,7 @@ import time
 from typing import Generic, Literal, Type, TypeVar, cast
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
+from openai.types.chat.chat_completion import Choice
 from tqdm import tqdm
 from pydantic import BaseModel, Field
 
@@ -187,6 +188,22 @@ class StructuredCompletion(BaseModel, Generic[T]):
     content: T
     start_time: float
     end_time: float
+    full_token_log_probs: list[list[TokenLogProb]] | None = None
+
+
+def parse_logprobs(first_choice: Choice) -> list[list[TokenLogProb]] | None:
+    token_log_probs = None
+    if first_choice.logprobs is not None and first_choice.logprobs.content is not None:
+        token_log_probs = [
+            [
+                TokenLogProb(
+                    token=token_log_prob.token, log_prob=token_log_prob.logprob
+                )
+                for token_log_prob in log_probs_content.top_logprobs
+            ]
+            for log_probs_content in first_choice.logprobs.content
+        ]
+    return token_log_probs
 
 
 async def generate_text_completion_for_conversation(
@@ -232,17 +249,7 @@ async def generate_text_completion_for_conversation(
     if message_content is None:
         raise ValueError("No message content returned from the completion.")
 
-    token_log_probs = None
-    if first_choice.logprobs is not None and first_choice.logprobs.content is not None:
-        token_log_probs = [
-            [
-                TokenLogProb(
-                    token=token_log_prob.token, log_prob=token_log_prob.logprob
-                )
-                for token_log_prob in log_probs_content.top_logprobs
-            ]
-            for log_probs_content in first_choice.logprobs.content
-        ]
+    full_token_log_probs = parse_logprobs(first_choice)
 
     return TextCompletion(
         conversation=conversation,
@@ -250,7 +257,7 @@ async def generate_text_completion_for_conversation(
         content=message_content,
         start_time=start_time,
         end_time=end_time,
-        full_token_log_probs=token_log_probs,
+        full_token_log_probs=full_token_log_probs,
     )
 
 
@@ -278,14 +285,24 @@ async def generate_structured_completion_for_conversation(
     )
     end_time = time.time()
 
-    content = completion.choices[0].message.parsed
+    first_choice = get_first_element(completion.choices)
+    if first_choice is None:
+        raise ValueError("No choices returned from the completion.")
+
+    message_content = first_choice.message.parsed
+
+    if message_content is None:
+        raise ValueError("No message content returned from the completion.")
+
+    full_token_log_probs = parse_logprobs(first_choice)
 
     return StructuredCompletion(
         conversation=conversation,
         model=model,
-        content=content,
+        content=message_content,
         start_time=start_time,
         end_time=end_time,
+        full_token_log_probs=full_token_log_probs,
     )
 
 
