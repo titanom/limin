@@ -110,9 +110,9 @@ class Conversation(BaseModel):
         user_prompt: str, system_prompt: str | None = None
     ) -> "Conversation":
         conversation = Conversation()
-        conversation.add_message(Message(role="user", content=user_prompt))
         if system_prompt:
             conversation.add_message(Message(role="system", content=system_prompt))
+        conversation.add_message(Message(role="user", content=user_prompt))
         return conversation
 
 
@@ -184,6 +184,11 @@ class StructuredCompletion(BaseModel, Generic[T]):
     start_time: float
     end_time: float
     full_token_log_probs: list[list[TokenLogProb]] | None = None
+
+    @property
+    def duration(self) -> float:
+        """The duration of the generation in seconds."""
+        return self.end_time - self.start_time
 
 
 def parse_logprobs(first_choice: Choice) -> list[list[TokenLogProb]] | None:

@@ -24,6 +24,19 @@ async def generate_structured_completion_for_conversation(
     api_key: str | None = None,
     base_url: str | None = None,
 ) -> StructuredCompletion[T]:
+    """
+    Generate a structured completion for a conversation.
+
+    :param conversation: The conversation to generate a completion for.
+    :param response_model: The model to parse the response into.
+    :param model: The model to use for the completion.
+    :param temperature: The temperature to use for the completion.
+    :param log_probs: Whether to log the probabilities of the tokens.
+    :param top_log_probs: The number of top log probabilities to return.
+    :param api_key: The API key to use for the completion.
+    :param base_url: The base URL to use for the completion.
+    :return: A StructuredCompletion object.
+    """
     client = AsyncOpenAI(api_key=api_key, base_url=base_url)
 
     start_time = time.time()
@@ -70,6 +83,20 @@ async def generate_structured_completion(
     api_key: str | None = None,
     base_url: str | None = None,
 ) -> StructuredCompletion[T]:
+    """
+    Generate a structured completion for a user prompt.
+
+    :param user_prompt: The user prompt to generate a completion for.
+    :param response_model: The model to parse the response into.
+    :param model: The model to use for the completion.
+    :param system_prompt: The system prompt to use for the completion.
+    :param temperature: The temperature to use for the completion.
+    :param log_probs: Whether to log the probabilities of the tokens.
+    :param top_log_probs: The number of top log probabilities to return.
+    :param api_key: The API key to use for the completion.
+    :param base_url: The base URL to use for the completion.
+    :return: A StructuredCompletion object.
+    """
     conversation = Conversation.from_prompts(user_prompt, system_prompt)
 
     return await generate_structured_completion_for_conversation(
@@ -97,6 +124,21 @@ async def generate_structured_completions_for_conversations(
     api_key: str | None = None,
     base_url: str | None = None,
 ) -> list[StructuredCompletion[T]]:
+    """
+    Generate structured completions for a list of conversations with support for parallel generation.
+
+    :param conversations: The list of conversations to generate completions for.
+    :param response_model: The model to parse the responses into.
+    :param n_parallel: The number of completions to generate in parallel.
+    :param model: The model to use for the completions.
+    :param temperature: The temperature to use for the completions.
+    :param log_probs: Whether to log the probabilities of the tokens.
+    :param top_log_probs: The number of top log probabilities to return.
+    :param show_progress: Whether to show a progress bar.
+    :param api_key: The API key to use for the completions.
+    :param base_url: The base URL to use for the completions.
+    :return: A list of StructuredCompletion objects.
+    """
     completions = []
 
     if show_progress:
@@ -147,6 +189,22 @@ async def generate_structured_completions(
     api_key: str | None = None,
     base_url: str | None = None,
 ) -> list[StructuredCompletion[T]]:
+    """
+    Generate structured completions for a list of user prompts with support for parallel generation.
+
+    :param user_prompts: The list of user prompts to generate completions for.
+    :param response_model: The model to parse the responses into.
+    :param n_parallel: The number of completions to generate in parallel.
+    :param model: The model to use for the completions.
+    :param system_prompt: The system prompt to use for the completions.
+    :param temperature: The temperature to use for the completions.
+    :param log_probs: Whether to log the probabilities of the tokens.
+    :param top_log_probs: The number of top log probabilities to return.
+    :param show_progress: Whether to show a progress bar.
+    :param api_key: The API key to use for the completions.
+    :param base_url: The base URL to use for the completions.
+    :return: A list of StructuredCompletion objects.
+    """
     conversations = [
         Conversation.from_prompts(user_prompt, system_prompt)
         for user_prompt in user_prompts
