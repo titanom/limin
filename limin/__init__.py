@@ -4,9 +4,6 @@ from .base import (
     Conversation,
     TextCompletion,
     StructuredCompletion,
-    get_first_element,
-    get_last_element,
-    parse_logprobs,
 )
 
 from .completion import (

@@ -1,17 +1,10 @@
 import asyncio
-import math
 import time
-from typing import Generic, Literal, Type, TypeVar, cast
 from openai import AsyncOpenAI
-from openai.types.chat import ChatCompletionMessageParam
-from openai.types.chat.chat_completion import Choice
 from tqdm import tqdm
-from pydantic import BaseModel, Field
 
 from .base import (
-    T,
     Conversation,
-    StructuredCompletion,
     TextCompletion,
     get_first_element,
     parse_logprobs,
