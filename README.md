@@ -14,6 +14,8 @@ Features:
 
 ✅ Working with log probabilities of tokens (including pretty printing).
 
+✅ Full structured completion support.
+
 ## Installation
 
 Install the library using pip:
@@ -37,7 +39,7 @@ For example, you can retrieve a text completion for a single user prompt by call
 from limin import generate_text_completion
 
 completion = await generate_text_completion("What is the capital of France?")
-print(completion.message)
+print(completion.content)
 ```
 
 If you want to use this in a script, you can do the following:
@@ -48,7 +50,7 @@ from limin import generate_text_completion
 
 async def main():
     completion = await generate_text_completion("What is the capital of France?")
-    print(completion.message)
+    print(completion.content)
 
 
 if __name__ == "__main__":
@@ -74,7 +76,7 @@ You can generate a single text completion for a user prompt by calling the `gene
 from limin import generate_text_completion
 
 completion = await generate_text_completion("What is the capital of France?")
-print(completion.message)
+print(completion.content)
 ```
 
 You can generate a single text completion for a conversation by calling the `generate_text_completion_for_conversation` function:
@@ -91,7 +93,7 @@ conversation = Conversation(
     ]
 )
 completion = await generate_text_completion_for_conversation(conversation)
-print(completion.message)
+print(completion.content)
 ```
 
 ### Generating Multiple Text Completions
@@ -107,7 +109,7 @@ completions = await generate_text_completions([
 ])
 
 for completion in completions:
-    print(completion.message)
+    print(completion.content)
 ```
 
 It's important to note that the `generate_text_completions` function will parallelize the generation of the text completions.
@@ -124,7 +126,7 @@ completions = await generate_text_completions([
 ], n_parallel=2)
 
 for completion in completions:
-    print(completion.message)
+    print(completion.content)
 ```
 
 You can also generate multiple text completions for a list of conversations by calling the `generate_text_completions_for_conversations` function:
@@ -152,11 +154,33 @@ completions = await generate_text_completions_for_conversations([
 ], n_parallel=2)
 
 for completion in completions:
-    print(completion.message)
+    print(completion.content)
 ```
 
 Note that both the `generate_text_completions` and `generate_text_completions_for_conversations` functions will show a progress bar if the `show_progress` parameter is set to `True` (which it is by default).
 You can suppress this by setting the `show_progress` parameter to `False`.
+
+### Structured Completions
+
+You can generate structured completions by calling the equivalent `structured_completion` functions.
+
+For example, you can generate a structured completion for a single user prompt by calling the `generate_structured_completion` function:
+
+```python
+from limin import generate_structured_completion
+
+# Note that you need to create a pydantic model containing the expected completion
+class CapitalModel(BaseModel):
+    capital: str
+
+completion = await generate_structured_completion(
+    "What is the capital of France?",
+    response_model=CapitalModel,
+)
+```
+
+You can similarly call the `generate_structured_completion_for_conversation`, `generate_structured_completions_for_conversations`, and `generate_structured_completions` functions.
+Structured completions also support extracting log probabilities of tokens.
 
 ### Extracting Log Probabilities
 
