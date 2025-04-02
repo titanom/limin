@@ -97,6 +97,13 @@ class Conversation(BaseModel):
             pretty_lines.append(f"{message.content}\n")
 
         return "\n".join(pretty_lines)
+    
+    def to_markdown(self) -> str:
+        markdown_str = ""
+        for message in self.messages:
+            markdown_str += f"## {message.role.capitalize()} \n"
+            markdown_str += f"{message.content}\n\n"
+        return markdown_str
 
     @property
     def openai_messages(self) -> list[ChatCompletionMessageParam]:
