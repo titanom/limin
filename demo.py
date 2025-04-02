@@ -18,6 +18,7 @@ async def main():
     print(completion.content.capital)
     print(completion.full_token_log_probs)
 
+
 if __name__ == "__main__":
     import asyncio
     import dotenv

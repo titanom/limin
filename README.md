@@ -158,6 +158,8 @@ for completion in completions:
 Note that both the `generate_text_completions` and `generate_text_completions_for_conversations` functions will show a progress bar if the `show_progress` parameter is set to `True` (which it is by default).
 You can suppress this by setting the `show_progress` parameter to `False`.
 
+### Structured Completions
+
 ### Extracting Log Probabilities
 
 You can extract the log probabilities of the tokens by accessing the `token_log_probs` attribute of the `TextCompletion` object.
