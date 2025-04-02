@@ -14,6 +14,8 @@ Features:
 
 ✅ Working with log probabilities of tokens (including pretty printing).
 
+✅ Full structured completion support.
+
 ## Installation
 
 Install the library using pip:
@@ -159,6 +161,26 @@ Note that both the `generate_text_completions` and `generate_text_completions_fo
 You can suppress this by setting the `show_progress` parameter to `False`.
 
 ### Structured Completions
+
+You can generate structured completions by calling the equivalent `structured_completion` functions.
+
+For example, you can generate a structured completion for a single user prompt by calling the `generate_structured_completion` function:
+
+```python
+from limin import generate_structured_completion
+
+# Note that you need to create a pydantic model containing the expected completion
+class CapitalModel(BaseModel):
+    capital: str
+
+completion = await generate_structured_completion(
+    "What is the capital of France?",
+    response_model=CapitalModel,
+)
+```
+
+You can similarly call the `generate_structured_completion_for_conversation`, `generate_structured_completions_for_conversations`, and `generate_structured_completions` functions.
+Structured completions also support extracting log probabilities of tokens.
 
 ### Extracting Log Probabilities
 
