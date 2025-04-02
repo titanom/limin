@@ -192,11 +192,10 @@ async def generate_text_completions(
     :param base_url: The base URL to use for the completions.
     :return: A list of TextCompletion objects.
     """
-    conversations: list[Conversation] = []
-
-    for user_prompt in user_prompts:
-        conversation = Conversation.from_prompts(user_prompt, system_prompt)
-        conversations.append(conversation)
+    conversations = [
+        Conversation.from_prompts(user_prompt, system_prompt)
+        for user_prompt in user_prompts
+    ]
 
     return await generate_text_completions_for_conversations(
         conversations,

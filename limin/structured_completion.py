@@ -1,6 +1,8 @@
+import asyncio
 import time
 from typing import Type
 from openai import AsyncOpenAI
+from tqdm import tqdm
 
 from .base import (
     T,
@@ -77,6 +79,88 @@ async def generate_structured_completion(
         temperature=temperature,
         log_probs=log_probs,
         top_log_probs=top_log_probs,
+        api_key=api_key,
+        base_url=base_url,
+    )
+
+
+async def generate_structured_completions_for_conversations(
+    conversations: list[Conversation],
+    response_model: Type[T],
+    n_parallel: int = 5,
+    *,
+    model: str = "gpt-4o",
+    temperature: float = 0.7,
+    log_probs: bool = False,
+    top_log_probs: int | None = None,
+    show_progress: bool = True,
+    api_key: str | None = None,
+    base_url: str | None = None,
+) -> list[StructuredCompletion[T]]:
+    completions = []
+
+    if show_progress:
+        progress_bar = tqdm(total=len(conversations))
+
+    for i in range(0, len(conversations), n_parallel):
+        conversations_batch = conversations[i : i + n_parallel]
+
+        tasks = [
+            asyncio.create_task(
+                generate_structured_completion_for_conversation(
+                    conversation,
+                    response_model=response_model,
+                    model=model,
+                    temperature=temperature,
+                    log_probs=log_probs,
+                    top_log_probs=top_log_probs,
+                    api_key=api_key,
+                    base_url=base_url,
+                )
+            )
+            for conversation in conversations_batch
+        ]
+
+        completions_batch = await asyncio.gather(*tasks)
+        completions.extend(completions_batch)
+
+        if show_progress:
+            progress_bar.update(len(completions_batch))
+
+    if show_progress:
+        progress_bar.close()
+
+    return completions
+
+
+async def generate_structured_completions(
+    user_prompts: list[str],
+    response_model: Type[T],
+    n_parallel: int = 5,
+    *,
+    model: str = "gpt-4o",
+    system_prompt: str | None = None,
+    temperature: float = 0.7,
+    log_probs: bool = False,
+    top_log_probs: int | None = None,
+    show_progress: bool = True,
+    api_key: str | None = None,
+    base_url: str | None = None,
+) -> list[StructuredCompletion[T]]:
+    conversations = [
+        Conversation.from_prompts(user_prompt, system_prompt)
+        for user_prompt in user_prompts
+    ]
+
+    return await generate_structured_completions_for_conversations(
+        conversations,
+        response_model=response_model,
+        n_parallel=n_parallel,
+        model=model,
+        temperature=temperature,
+        log_probs=log_probs,
+        top_log_probs=top_log_probs,
+        show_progress=show_progress,
         api_key=api_key,
         base_url=base_url,
     )
