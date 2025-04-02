@@ -1,11 +1,11 @@
 import asyncio
-from dataclasses import dataclass
 import math
 import time
 from typing import Literal, TypeVar, cast
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from tqdm import tqdm
+from pydantic import BaseModel, Field
 
 
 T = TypeVar("T")
@@ -23,8 +23,7 @@ def get_last_element(list: list[T]) -> T | None:
     return list[-1]
 
 
-@dataclass
-class Message:
+class Message(BaseModel):
     role: Literal["system", "user", "assistant"]
     content: str
 
@@ -35,8 +34,7 @@ class Message:
         )
 
 
-@dataclass
-class TokenLogProb:
+class TokenLogProb(BaseModel):
     token: str
     log_prob: float
 
@@ -48,9 +46,8 @@ class TokenLogProb:
         return f"TokenLogProb(token={self.token!r}, prob={round(self.prob, 2)})"
 
 
-class Conversation:
-    def __init__(self, messages: list[Message] | None = None):
-        self.messages = messages or []
+class Conversation(BaseModel):
+    messages: list[Message] = Field(default_factory=list)
 
     def add_message(self, message: Message):
         last_message = get_last_element(self.messages)
@@ -106,8 +103,7 @@ class Conversation:
         return [message.openai_message for message in self.messages]
 
 
-@dataclass
-class TextCompletion:
+class TextCompletion(BaseModel):
     conversation: Conversation
     model: str
     message: str
