@@ -1,7 +1,7 @@
 import asyncio
 import math
 import time
-from typing import Literal, TypeVar, cast
+from typing import Generic, Literal, Type, TypeVar, cast
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from tqdm import tqdm
@@ -97,7 +97,7 @@ class Conversation(BaseModel):
             pretty_lines.append(f"{message.content}\n")
 
         return "\n".join(pretty_lines)
-    
+
     def to_markdown(self) -> str:
         markdown_str = ""
         for message in self.messages:
@@ -109,11 +109,21 @@ class Conversation(BaseModel):
     def openai_messages(self) -> list[ChatCompletionMessageParam]:
         return [message.openai_message for message in self.messages]
 
+    @staticmethod
+    def from_prompts(
+        user_prompt: str, system_prompt: str | None = None
+    ) -> "Conversation":
+        conversation = Conversation()
+        conversation.add_message(Message(role="user", content=user_prompt))
+        if system_prompt:
+            conversation.add_message(Message(role="system", content=system_prompt))
+        return conversation
+
 
 class TextCompletion(BaseModel):
     conversation: Conversation
     model: str
-    message: str
+    content: str
     start_time: float
     end_time: float
 
@@ -169,6 +179,14 @@ class TextCompletion(BaseModel):
                 result.append(f"{color_code}{token_log_prob.token}{reset_code}")
 
         return "".join(result)
+
+
+class StructuredCompletion(BaseModel, Generic[T]):
+    conversation: Conversation
+    model: str
+    content: T
+    start_time: float
+    end_time: float
 
 
 async def generate_text_completion_for_conversation(
@@ -229,10 +247,45 @@ async def generate_text_completion_for_conversation(
     return TextCompletion(
         conversation=conversation,
         model=model,
-        message=message_content,
+        content=message_content,
         start_time=start_time,
         end_time=end_time,
         full_token_log_probs=token_log_probs,
+    )
+
+
+async def generate_structured_completion_for_conversation(
+    conversation: Conversation,
+    response_model: Type[T],
+    *,
+    model: str = "gpt-4o",
+    temperature: float = 0.7,
+    log_probs: bool = False,
+    top_log_probs: int | None = None,
+    api_key: str | None = None,
+    base_url: str | None = None,
+) -> StructuredCompletion[T]:
+    client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+
+    start_time = time.time()
+    completion = await client.beta.chat.completions.parse(
+        model=model,
+        messages=conversation.openai_messages,
+        response_format=response_model,
+        temperature=temperature,
+        logprobs=log_probs,
+        top_logprobs=top_log_probs,
+    )
+    end_time = time.time()
+
+    content = completion.choices[0].message.parsed
+
+    return StructuredCompletion(
+        conversation=conversation,
+        model=model,
+        content=content,
+        start_time=start_time,
+        end_time=end_time,
     )
 
 
@@ -260,13 +313,36 @@ async def generate_text_completion(
     :param base_url: The base URL to use for the completion.
     :return: A TextCompletion object.
     """
-    conversation = Conversation()
-    if system_prompt:
-        conversation.add_message(Message(role="system", content=system_prompt))
-    conversation.add_message(Message(role="user", content=user_prompt))
+    conversation = Conversation.from_prompts(user_prompt, system_prompt)
 
     return await generate_text_completion_for_conversation(
         conversation,
+        model=model,
+        temperature=temperature,
+        log_probs=log_probs,
+        top_log_probs=top_log_probs,
+        api_key=api_key,
+        base_url=base_url,
+    )
+
+
+async def generate_structured_completion(
+    user_prompt: str,
+    response_model: Type[T],
+    *,
+    model: str = "gpt-4o",
+    system_prompt: str | None = None,
+    temperature: float = 0.7,
+    log_probs: bool = False,
+    top_log_probs: int | None = None,
+    api_key: str | None = None,
+    base_url: str | None = None,
+) -> StructuredCompletion[T]:
+    conversation = Conversation.from_prompts(user_prompt, system_prompt)
+
+    return await generate_structured_completion_for_conversation(
+        conversation,
+        response_model=response_model,
         model=model,
         temperature=temperature,
         log_probs=log_probs,

@@ -37,7 +37,7 @@ For example, you can retrieve a text completion for a single user prompt by call
 from limin import generate_text_completion
 
 completion = await generate_text_completion("What is the capital of France?")
-print(completion.message)
+print(completion.content)
 ```
 
 If you want to use this in a script, you can do the following:
@@ -48,7 +48,7 @@ from limin import generate_text_completion
 
 async def main():
     completion = await generate_text_completion("What is the capital of France?")
-    print(completion.message)
+    print(completion.content)
 
 
 if __name__ == "__main__":
@@ -74,7 +74,7 @@ You can generate a single text completion for a user prompt by calling the `gene
 from limin import generate_text_completion
 
 completion = await generate_text_completion("What is the capital of France?")
-print(completion.message)
+print(completion.content)
 ```
 
 You can generate a single text completion for a conversation by calling the `generate_text_completion_for_conversation` function:
@@ -91,7 +91,7 @@ conversation = Conversation(
     ]
 )
 completion = await generate_text_completion_for_conversation(conversation)
-print(completion.message)
+print(completion.content)
 ```
 
 ### Generating Multiple Text Completions
@@ -107,7 +107,7 @@ completions = await generate_text_completions([
 ])
 
 for completion in completions:
-    print(completion.message)
+    print(completion.content)
 ```
 
 It's important to note that the `generate_text_completions` function will parallelize the generation of the text completions.
@@ -124,7 +124,7 @@ completions = await generate_text_completions([
 ], n_parallel=2)
 
 for completion in completions:
-    print(completion.message)
+    print(completion.content)
 ```
 
 You can also generate multiple text completions for a list of conversations by calling the `generate_text_completions_for_conversations` function:
@@ -152,7 +152,7 @@ completions = await generate_text_completions_for_conversations([
 ], n_parallel=2)
 
 for completion in completions:
-    print(completion.message)
+    print(completion.content)
 ```
 
 Note that both the `generate_text_completions` and `generate_text_completions_for_conversations` functions will show a progress bar if the `show_progress` parameter is set to `True` (which it is by default).
