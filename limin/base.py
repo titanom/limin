@@ -204,3 +204,22 @@ def parse_logprobs(first_choice: Choice) -> list[list[TokenLogProb]] | None:
             for log_probs_content in first_choice.logprobs.content
         ]
     return token_log_probs
+
+
+class ModelConfiguration(BaseModel):
+    model: str
+    temperature: float
+    log_probs: bool
+    top_log_probs: int | None
+    api_key: str | None
+    base_url: str | None
+
+
+DEFAULT_MODEL_CONFIGURATION = ModelConfiguration(
+    model="gpt-4o",
+    temperature=0.7,
+    log_probs=False,
+    top_log_probs=None,
+    api_key=None,
+    base_url=None,
+)
