@@ -23,7 +23,7 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install ruff mypy
-          mypy --install-types
+          mypy --install-types --non-interactive
           pip install types-tqdm
 
       - name: ✨ Run ruff format check
@@ -33,4 +33,4 @@ jobs:
         run: ruff check .
 
       - name: 🧪 Run mypy
-        run: mypy .
+        run: mypy

@@ -4,17 +4,21 @@ from .base import (
     Conversation,
     TextCompletion,
     StructuredCompletion,
+    ModelConfiguration,
 )
 
 from .completion import (
     generate_text_completion_for_conversation,
     generate_text_completion,
     generate_text_completions_for_conversations,
+    generate_text_completions,
 )
 
 from .structured_completion import (
     generate_structured_completion_for_conversation,
     generate_structured_completion,
+    generate_structured_completions_for_conversations,
+    generate_structured_completions,
 )
 
 __all__ = [
@@ -24,11 +28,15 @@ __all__ = [
     "Conversation",
     "TextCompletion",
     "StructuredCompletion",
+    "ModelConfiguration",
     # From completion
     "generate_text_completion_for_conversation",
     "generate_text_completion",
     "generate_text_completions_for_conversations",
+    "generate_text_completions",
     # From structured_completion
     "generate_structured_completion_for_conversation",
     "generate_structured_completion",
+    "generate_structured_completions_for_conversations",
+    "generate_structured_completions",
 ]
