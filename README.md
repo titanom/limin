@@ -155,6 +155,8 @@ for completion in completions:
 Note that both the `generate_text_completions` and `generate_text_completions_for_conversations` functions will show a progress bar if the `show_progress` parameter is set to `True` (which it is by default).
 You can suppress this by setting the `show_progress` parameter to `False`.
 
+You can find the full example in the [`examples/multiple_completions.py`](examples/multiple_completions.py) file.
+
 ### Structured Completions
 
 You can generate structured completions by calling the equivalent `structured_completion` functions.
@@ -177,6 +179,8 @@ print(completion.content.capital)
 
 You can similarly call the `generate_structured_completion_for_conversation`, `generate_structured_completions_for_conversations`, and `generate_structured_completions` functions.
 Structured completions also support extracting log probabilities of tokens.
+
+You can find the full example in the [`examples/structured_completion.py`](examples/structured_completion.py) file.
 
 ### Extracting Log Probabilities
 
@@ -213,6 +217,8 @@ print(completion.full_token_log_probs)
 
 This will return a list of lists of `TokenLogProb` objects (for each token position the `top_log_probs` number of most likely tokens).
 
+You can find the full example in the [`examples/log_probabilities.py`](examples/log_probabilities.py) file.
+
 ### Specifying the Model Configuration
 
 You can specify the model configuration by passing a `ModelConfiguration` object to the generation functions.
@@ -233,6 +239,8 @@ completion = await generate_text_completion(
 )
 print(completion.content)
 ```
+
+You can find the full example in the [`examples/model_configuration.py`](examples/model_configuration.py) file.
 
 ## Important Classes
 

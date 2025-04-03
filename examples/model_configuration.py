@@ -8,7 +8,9 @@ async def main():
         log_probs=True,
         top_log_probs=10,
     )
-    completion = await generate_text_completion("What is the capital of France?", model_configuration=model_configuration)
+    completion = await generate_text_completion(
+        "What is the capital of France?", model_configuration=model_configuration
+    )
     print(completion.content)
 
 
