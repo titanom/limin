@@ -4,6 +4,7 @@ from .base import (
     Conversation,
     TextCompletion,
     StructuredCompletion,
+    ModelConfiguration,
 )
 
 from .completion import (
@@ -24,6 +25,7 @@ __all__ = [
     "Conversation",
     "TextCompletion",
     "StructuredCompletion",
+    "ModelConfiguration",
     # From completion
     "generate_text_completion_for_conversation",
     "generate_text_completion",

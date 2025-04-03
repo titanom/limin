@@ -72,6 +72,7 @@ async def generate_text_completion(
     Generate a text completion for a user prompt.
 
     :param user_prompt: The user prompt to generate a completion for.
+    :param system_prompt: The system prompt to use for the completion.
     :param model_configuration: The model configuration to use for the completion.
     :return: A TextCompletion object.
     """
@@ -142,9 +143,9 @@ async def generate_text_completions(
     Generate a list of text completions for a list of user prompts with support for parallel generation.
 
     :param user_prompts: The list of user prompts to generate completions for.
+    :param system_prompt: The system prompt to use for the completions.
     :param n_parallel: The number of completions to generate in parallel.
     :param model_configuration: The model configuration to use for the completions.
-    :param system_prompt: The system prompt to use for the completions.
     :param show_progress: Whether to show a progress bar.
     :return: A list of TextCompletion objects.
     """
