@@ -21,3 +21,6 @@ packages = ["limin"]
 
 [tool.setuptools.package-data]
 limin = ["py.typed"]
+
+[tool.mypy]
+files = "limin/"

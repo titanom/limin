@@ -33,4 +33,4 @@ jobs:
         run: ruff check .
 
       - name: 🧪 Run mypy
-        run: mypy .
+        run: mypy
