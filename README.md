@@ -26,23 +26,16 @@ python -m pip install limin
 
 ## Usage
 
-### General Usage Notes
+### The Simplest Example
 
-Note that the entire library is asynchronous.
-If you want to use it in a script, you can use `asyncio.run` to run the main function.
+After you've installed the library, you can use it by importing the `limin` module and calling the functions you need.
+You will also need to provide an API key for your API either by running `export OPENAI_API_KEY=$YOUR_API_KEY` or by creating an `.env` file in the root directory of your project and adding the following line:
 
-Additionally, you will need to set the `OPENAI_API_KEY` environment variable to your API key (or pass the `api_key` parameter to the function you want to use).
-
-For example, you can retrieve a text completion for a single user prompt by calling the `generate_text_completion` function:
-
-```python
-from limin import generate_text_completion
-
-completion = await generate_text_completion("What is the capital of France?")
-print(completion.content)
+```
+OPENAI_API_KEY=$YOUR_API_KEY
 ```
 
-If you want to use this in a script, you can do the following:
+Now, you can create a simple script that generates a text completion for a user prompt:
 
 ```python
 from limin import generate_text_completion
@@ -67,6 +60,8 @@ This will print something like:
 ```
 The capital of France is Paris.
 ```
+
+You can find the full example in the [`examples/single_completion.py`](examples/single_completion.py) file.
 
 ### Generating a Single Text Completion
 
@@ -177,6 +172,7 @@ completion = await generate_structured_completion(
     "What is the capital of France?",
     response_model=CapitalModel,
 )
+print(completion.content.capital)
 ```
 
 You can similarly call the `generate_structured_completion_for_conversation`, `generate_structured_completions_for_conversations`, and `generate_structured_completions` functions.
@@ -216,6 +212,27 @@ print(completion.full_token_log_probs)
 ```
 
 This will return a list of lists of `TokenLogProb` objects (for each token position the `top_log_probs` number of most likely tokens).
+
+### Specifying the Model Configuration
+
+You can specify the model configuration by passing a `ModelConfiguration` object to the generation functions.
+
+```python
+from limin import ModelConfiguration
+
+model_configuration = ModelConfiguration(
+    model="gpt-4o",
+    temperature=0.7,
+    log_probs=True,
+    top_log_probs=10,
+)
+
+completion = await generate_text_completion(
+    "What is 2+2?",
+    model_configuration=model_configuration,
+)
+print(completion.content)
+```
 
 ## Important Classes
 
