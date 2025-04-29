@@ -92,14 +92,14 @@ class Conversation(BaseModel):
 
             pretty_lines.append(f"{message.content}\n")
 
-        return "\n".join(pretty_lines)
+        return "\n".join(pretty_lines).strip()
 
     def to_markdown(self) -> str:
         markdown_str = ""
         for message in self.messages:
             markdown_str += f"## {message.role.capitalize()} \n"
             markdown_str += f"{message.content}\n\n"
-        return markdown_str
+        return markdown_str.strip()
 
     @property
     def openai_messages(self) -> list[ChatCompletionMessageParam]:
@@ -107,12 +107,18 @@ class Conversation(BaseModel):
 
     @staticmethod
     def from_prompts(
-        user_prompt: str, system_prompt: str | None = None
+        user_prompt: str,
+        assistant_prompt: str | None = None,
+        system_prompt: str | None = None,
     ) -> "Conversation":
         conversation = Conversation()
         if system_prompt:
             conversation.add_message(Message(role="system", content=system_prompt))
         conversation.add_message(Message(role="user", content=user_prompt))
+        if assistant_prompt:
+            conversation.add_message(
+                Message(role="assistant", content=assistant_prompt)
+            )
         return conversation
 
 
