@@ -243,7 +243,7 @@ def parse_logprobs(first_choice: Choice) -> list[list[TokenLogProb]] | None:
 
 class ModelConfiguration(BaseModel):
     model: str = "gpt-4o"
-    temperature: float = 0.7
+    temperature: float = 1.0
     log_probs: bool = False
     top_log_probs: int | None = None
     max_tokens: int | None = None
