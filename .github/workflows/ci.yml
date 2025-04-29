@@ -34,3 +34,9 @@ jobs:
 
       - name: 🧪 Run mypy
         run: mypy
+
+      - name: 🧪 Run tests
+        run: |
+          pip install pytest
+          pip install -e .
+          pytest

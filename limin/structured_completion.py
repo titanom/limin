@@ -44,6 +44,11 @@ async def generate_structured_completion_for_conversation(
         temperature=model_configuration.temperature,
         logprobs=model_configuration.log_probs,
         top_logprobs=model_configuration.top_log_probs,
+        max_tokens=model_configuration.max_tokens,
+        presence_penalty=model_configuration.presence_penalty,
+        frequency_penalty=model_configuration.frequency_penalty,
+        top_p=model_configuration.top_p,
+        seed=model_configuration.seed,
     )
     end_time = time.time()
 
@@ -114,6 +119,8 @@ async def generate_structured_completions_for_conversations(
     """
     completions = []
 
+    progress_bar = None
+
     if show_progress:
         progress_bar = tqdm(total=len(conversations))
 
@@ -134,10 +141,10 @@ async def generate_structured_completions_for_conversations(
         completions_batch = await asyncio.gather(*tasks)
         completions.extend(completions_batch)
 
-        if show_progress:
+        if show_progress and progress_bar is not None:
             progress_bar.update(len(completions_batch))
 
-    if show_progress:
+    if show_progress and progress_bar is not None:
         progress_bar.close()
 
     return completions

@@ -92,14 +92,14 @@ class Conversation(BaseModel):
 
             pretty_lines.append(f"{message.content}\n")
 
-        return "\n".join(pretty_lines)
+        return "\n".join(pretty_lines).strip()
 
     def to_markdown(self) -> str:
         markdown_str = ""
         for message in self.messages:
             markdown_str += f"## {message.role.capitalize()} \n"
             markdown_str += f"{message.content}\n\n"
-        return markdown_str
+        return markdown_str.strip()
 
     @property
     def openai_messages(self) -> list[ChatCompletionMessageParam]:
@@ -107,13 +107,53 @@ class Conversation(BaseModel):
 
     @staticmethod
     def from_prompts(
-        user_prompt: str, system_prompt: str | None = None
+        user_prompt: str,
+        assistant_prompt: str | None = None,
+        system_prompt: str | None = None,
     ) -> "Conversation":
         conversation = Conversation()
-        if system_prompt:
+        if system_prompt is not None:
             conversation.add_message(Message(role="system", content=system_prompt))
         conversation.add_message(Message(role="user", content=user_prompt))
+        if assistant_prompt is not None:
+            conversation.add_message(
+                Message(role="assistant", content=assistant_prompt)
+            )
         return conversation
+
+
+def format_token_log_probs(
+    token_log_probs: list[TokenLogProb], show_probabilities: bool = False
+) -> str:
+    """
+    Returns a pretty string representation of the token log probabilities.
+    Tokens are colored from dark red (low probability) to dark green (high probability).
+
+    :param token_log_probs: List of TokenLogProb objects to format
+    :param show_probabilities: Whether to show the probability value after each token.
+    """
+    result = []
+    for token_log_prob in token_log_probs:
+        if token_log_prob.prob < 0.25:
+            color_code = "\033[1;31m"  # Dark red
+        elif token_log_prob.prob < 0.5:
+            color_code = "\033[1;33m"  # Yellow
+        elif token_log_prob.prob < 0.75:
+            color_code = "\033[1;32m"  # Light green
+        else:
+            color_code = "\033[1;92m"  # Dark green
+
+        # Reset color code
+        reset_code = "\033[0m"
+
+        if show_probabilities:
+            result.append(
+                f"{color_code}{token_log_prob.token}[{round(token_log_prob.prob, 2)}]{reset_code}"
+            )
+        else:
+            result.append(f"{color_code}{token_log_prob.token}{reset_code}")
+
+    return "".join(result)
 
 
 class TextCompletion(BaseModel):
@@ -153,28 +193,7 @@ class TextCompletion(BaseModel):
         if self.token_log_probs is None:
             return "No token log probabilities available."
 
-        result = []
-        for token_log_prob in self.token_log_probs:
-            if token_log_prob.prob < 0.25:
-                color_code = "\033[1;31m"  # Dark red
-            elif token_log_prob.prob < 0.5:
-                color_code = "\033[1;33m"  # Yellow
-            elif token_log_prob.prob < 0.75:
-                color_code = "\033[1;32m"  # Light green
-            else:
-                color_code = "\033[1;92m"  # Dark green
-
-            # Reset color code
-            reset_code = "\033[0m"
-
-            if show_probabilities:
-                result.append(
-                    f"{color_code}{token_log_prob.token}[{round(token_log_prob.prob, 2)}]{reset_code}"
-                )
-            else:
-                result.append(f"{color_code}{token_log_prob.token}{reset_code}")
-
-        return "".join(result)
+        return format_token_log_probs(self.token_log_probs, show_probabilities)
 
 
 class StructuredCompletion(BaseModel, Generic[T]):
@@ -189,6 +208,22 @@ class StructuredCompletion(BaseModel, Generic[T]):
     def duration(self) -> float:
         """The duration of the generation in seconds."""
         return self.end_time - self.start_time
+
+    @property
+    def token_log_probs(self) -> list[TokenLogProb] | None:
+        if self.full_token_log_probs is None:
+            return None
+
+        return [
+            token_log_probs_position[0]
+            for token_log_probs_position in self.full_token_log_probs
+        ]
+
+    def to_pretty_log_probs_string(self, show_probabilities: bool = False) -> str:
+        if self.token_log_probs is None:
+            return "No token log probabilities available."
+
+        return format_token_log_probs(self.token_log_probs, show_probabilities)
 
 
 def parse_logprobs(first_choice: Choice) -> list[list[TokenLogProb]] | None:
@@ -208,9 +243,14 @@ def parse_logprobs(first_choice: Choice) -> list[list[TokenLogProb]] | None:
 
 class ModelConfiguration(BaseModel):
     model: str = "gpt-4o"
-    temperature: float = 0.7
+    temperature: float = 1.0
     log_probs: bool = False
     top_log_probs: int | None = None
+    max_tokens: int | None = None
+    presence_penalty: float | None = None
+    frequency_penalty: float | None = None
+    top_p: float | None = None
+    seed: int | None = None
     api_key: str | None = None
     base_url: str | None = None
 
