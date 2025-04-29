@@ -112,10 +112,10 @@ class Conversation(BaseModel):
         system_prompt: str | None = None,
     ) -> "Conversation":
         conversation = Conversation()
-        if system_prompt:
+        if system_prompt is not None:
             conversation.add_message(Message(role="system", content=system_prompt))
         conversation.add_message(Message(role="user", content=user_prompt))
-        if assistant_prompt:
+        if assistant_prompt is not None:
             conversation.add_message(
                 Message(role="assistant", content=assistant_prompt)
             )
