@@ -1,7 +1,4 @@
-import math
 import pytest
-from typing import Literal, cast
-from openai.types.chat import ChatCompletionMessageParam
 
 from limin import (
     Conversation,
