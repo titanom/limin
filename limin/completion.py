@@ -39,6 +39,11 @@ async def generate_text_completion_for_conversation(
         temperature=model_configuration.temperature,
         logprobs=model_configuration.log_probs,
         top_logprobs=model_configuration.top_log_probs,
+        max_tokens=model_configuration.max_tokens,
+        presence_penalty=model_configuration.presence_penalty,
+        frequency_penalty=model_configuration.frequency_penalty,
+        top_p=model_configuration.top_p,
+        seed=model_configuration.seed,
     )
     end_time = time.time()
 
