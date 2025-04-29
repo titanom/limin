@@ -1,8 +1,15 @@
+import math
 import pytest
 from typing import Literal, cast
 from openai.types.chat import ChatCompletionMessageParam
 
-from limin import Conversation, Message, TokenLogProb
+from limin import (
+    Conversation,
+    Message,
+    TextCompletion,
+    TokenLogProb,
+    StructuredCompletion,
+)
 
 
 def test_message_openai_message():
@@ -181,3 +188,120 @@ def test_conversation_from_prompts_user_assistant_system_prompt():
     assert conversation.messages[1].content == "Hello"
     assert conversation.messages[2].role == "assistant"
     assert conversation.messages[2].content == "Hi there"
+
+
+def create_text_completion():
+    conversation = Conversation.from_prompts("Hello", "Hi there")
+
+    return TextCompletion(
+        conversation=conversation,
+        model="gpt-4o",
+        content="Test content",
+        start_time=100.0,
+        end_time=105.5,
+        full_token_log_probs=[
+            [
+                TokenLogProb(token="Test", log_prob=-0.1),
+                TokenLogProb(token="Example", log_prob=-0.2),
+            ],
+            [
+                TokenLogProb(token="content", log_prob=-0.2),
+                TokenLogProb(token="word", log_prob=-0.3),
+            ],
+        ],
+    )
+
+
+def create_structured_completion():
+    conversation = Conversation.from_prompts("Hello", "Hi there")
+
+    return StructuredCompletion(
+        conversation=conversation,
+        model="gpt-4o",
+        content={"key": "value"},
+        start_time=100.0,
+        end_time=107.0,
+        full_token_log_probs=[
+            [
+                TokenLogProb(token="{", log_prob=-0.1),
+                TokenLogProb(token="[", log_prob=-0.3),
+            ],
+            [
+                TokenLogProb(token="key", log_prob=-0.2),
+                TokenLogProb(token="name", log_prob=-0.4),
+            ],
+        ],
+    )
+
+
+def test_text_completion_duration():
+    text_completion = create_text_completion()
+
+    assert text_completion.duration == 5.5
+
+
+def test_text_completion_token_log_probs():
+    text_completion = create_text_completion()
+
+    assert len(text_completion.token_log_probs) == 2
+    assert text_completion.token_log_probs[0].token == "Test"
+    assert text_completion.token_log_probs[0].log_prob == -0.1
+    assert text_completion.token_log_probs[1].token == "content"
+    assert text_completion.token_log_probs[1].log_prob == -0.2
+
+
+def test_text_completion_to_pretty_log_probs_string():
+    text_completion = create_text_completion()
+
+    pretty_log_probs_string = text_completion.to_pretty_log_probs_string()
+
+    assert pretty_log_probs_string == "\x1b[1;92mTest\x1b[0m\x1b[1;92mcontent\x1b[0m"
+
+
+def test_text_completion_to_pretty_log_probs_string_with_probabilities():
+    text_completion = create_text_completion()
+
+    pretty_log_probs_string = text_completion.to_pretty_log_probs_string(
+        show_probabilities=True
+    )
+
+    assert (
+        pretty_log_probs_string
+        == "\x1b[1;92mTest[0.9]\x1b[0m\x1b[1;92mcontent[0.82]\x1b[0m"
+    )
+
+
+def test_structured_completion_duration():
+    structured_completion = create_structured_completion()
+
+    assert structured_completion.duration == 7.0
+
+
+def test_structured_completion_token_log_probs():
+    structured_completion = create_structured_completion()
+
+    assert len(structured_completion.token_log_probs) == 2
+    assert structured_completion.token_log_probs[0].token == "{"
+    assert structured_completion.token_log_probs[0].log_prob == -0.1
+    assert structured_completion.token_log_probs[1].token == "key"
+    assert structured_completion.token_log_probs[1].log_prob == -0.2
+
+
+def test_structured_completion_to_pretty_log_probs_string():
+    structured_completion = create_structured_completion()
+
+    pretty_log_probs_string = structured_completion.to_pretty_log_probs_string()
+
+    assert pretty_log_probs_string == "\x1b[1;92m{\x1b[0m\x1b[1;92mkey\x1b[0m"
+
+
+def test_structured_completion_to_pretty_log_probs_string_with_probabilities():
+    structured_completion = create_structured_completion()
+
+    pretty_log_probs_string = structured_completion.to_pretty_log_probs_string(
+        show_probabilities=True
+    )
+
+    assert (
+        pretty_log_probs_string == "\x1b[1;92m{[0.9]\x1b[0m\x1b[1;92mkey[0.82]\x1b[0m"
+    )
