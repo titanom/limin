@@ -91,7 +91,7 @@ async def generate_structured_completion(
     if model_configuration is None:
         model_configuration = DEFAULT_MODEL_CONFIGURATION
 
-    conversation = Conversation.from_prompts(user_prompt, system_prompt)
+    conversation = Conversation.from_prompts(user_prompt, system_prompt=system_prompt)
 
     return await generate_structured_completion_for_conversation(
         conversation,
@@ -170,7 +170,7 @@ async def generate_structured_completions(
     :return: A list of StructuredCompletion objects.
     """
     conversations = [
-        Conversation.from_prompts(user_prompt, system_prompt)
+        Conversation.from_prompts(user_prompt, system_prompt=system_prompt)
         for user_prompt in user_prompts
     ]
 
