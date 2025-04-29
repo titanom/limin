@@ -1,11 +1,15 @@
-from limin import generate_text_completion
+from limin import generate_text_completion, ModelConfiguration
 
 
 async def main():
-    completion = await generate_text_completion(
-        "What is 2+2?",
+    model_configuration = ModelConfiguration(
+        model="gpt-4o",
         log_probs=True,
         top_log_probs=10,
+    )
+    completion = await generate_text_completion(
+        "What is 2+2?",
+        model_configuration=model_configuration,
     )
     print("Token log probabilities:")
     print(completion.token_log_probs)
