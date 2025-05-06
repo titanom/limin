@@ -2,7 +2,7 @@ import asyncio
 
 from pydantic import BaseModel, Field
 
-from limin.tool_call import Tool, generate_tool_call_completion
+from limin import Tool, generate_tool_call_completion
 
 
 class GetWeatherParameters(BaseModel):

@@ -16,6 +16,8 @@ Features:
 
 ✅ Full structured completion support.
 
+✅ Tool call support.
+
 ## Installation
 
 Install the library using pip:
@@ -24,16 +26,10 @@ Install the library using pip:
 python -m pip install limin
 ```
 
-## Usage
-
-### The Simplest Example
+## A Simple Example
 
 After you've installed the library, you can use it by importing the `limin` module and calling the functions you need.
-You will also need to provide an API key for your API either by running `export OPENAI_API_KEY=$YOUR_API_KEY` or by creating an `.env` file in the root directory of your project and adding the following line:
-
-```
-OPENAI_API_KEY=$YOUR_API_KEY
-```
+You will need to provide the `OPENAI_API_KEY` environment variable.
 
 Now, you can create a simple script that generates a text completion for a user prompt:
 
@@ -48,10 +44,6 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
-    import dotenv
-
-    dotenv.load_dotenv()
-
     asyncio.run(main())
 ```
 
@@ -62,6 +54,38 @@ The capital of France is Paris.
 ```
 
 You can find the full example in the [`examples/single_completion.py`](examples/single_completion.py) file.
+
+### Side Note: Passing the API Key
+
+The `limin` library gives you three ways to provide the API key.
+
+The simplest one is to simply set the `OPENAI_API_KEY` environment variable by running `export OPENAI_API_KEY=$YOUR_API_KEY`.
+
+You can also create a `.env` file in the root directory of your project and add the following line:
+
+```
+OPENAI_API_KEY=$YOUR_API_KEY
+```
+
+Note that you will need to load the `.env` file in your project using a library like `python-dotenv`:
+
+```python
+import dotenv
+
+dotenv.load_dotenv()
+```
+
+You can also pass the API key to the various functions by passing the `api_key` parameter.
+For example:
+
+```python
+completion = await generate_text_completion(
+    "What is the capital of France?",
+    api_key="your_api_key",
+)
+```
+
+## Generating Text Completions
 
 ### Generating a Single Text Completion
 
@@ -157,7 +181,7 @@ You can suppress this by setting the `show_progress` parameter to `False`.
 
 You can find the full example in the [`examples/multiple_completions.py`](examples/multiple_completions.py) file.
 
-### Structured Completions
+## Generating Structured Completions
 
 You can generate structured completions by calling the equivalent `structured_completion` functions.
 
@@ -182,7 +206,44 @@ Structured completions also support extracting log probabilities of tokens.
 
 You can find the full example in the [`examples/structured_completion.py`](examples/structured_completion.py) file.
 
-### Extracting Log Probabilities
+## Tool Call Support
+
+You can generate tool calls by calling the `generate_tool_call_completion` function:
+
+```python
+from pydantic import BaseModel, Field
+from limin.tool_call import Tool, generate_tool_call_completion
+
+
+class GetWeatherParameters(BaseModel):
+    location: str = Field(description="City and country e.g. Bogotá, Colombia")
+
+
+get_weather_tool = Tool(
+    name="get_weather",
+    description="Get current temperature for provided location in celsius.",
+    parameters=GetWeatherParameters,
+)
+
+completion = await generate_tool_call_completion(
+    "What's the weather like in Paris today?",
+    get_weather_tool,
+)
+print(completion)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+You can find the full example in the [`examples/tool_call.py`](examples/tool_call.py) file.
+
+You can also pass multiple tools to the `generate_tool_call_completion` function and have the model choose the best tool to use based on the user prompt.
+You can find an example in the [`examples/multiple_tool_calls.py`](examples/multiple_tool_calls.py) file.
+
+Additionally, the `generate_tool_call_completion_for_conversation` function can be used to generate tool calls for a conversation.
+
+## Extracting Log Probabilities
 
 You can extract the log probabilities of the tokens by accessing the `token_log_probs` attribute of the `TextCompletion` object.
 You will need to pass the `log_probs` parameter to the generation function together with the `top_log_probs` parameter to get the most likely tokens:
@@ -219,29 +280,6 @@ This will return a list of lists of `TokenLogProb` objects (for each token posit
 
 You can find the full example in the [`examples/log_probabilities.py`](examples/log_probabilities.py) file.
 
-### Specifying the Model Configuration
-
-You can specify the model configuration by passing a `ModelConfiguration` object to the generation functions.
-
-```python
-from limin import ModelConfiguration
-
-model_configuration = ModelConfiguration(
-    model="gpt-4o",
-    temperature=0.7,
-    log_probs=True,
-    top_log_probs=10,
-)
-
-completion = await generate_text_completion(
-    "What is 2+2?",
-    model_configuration=model_configuration,
-)
-print(completion.content)
-```
-
-You can find the full example in the [`examples/model_configuration.py`](examples/model_configuration.py) file.
-
 ## Important Classes
 
 ### The Message Class
@@ -275,3 +313,26 @@ This has the following attributes:
 - `duration`: The duration of the generation took (in seconds).
 
 The `start_time`, `end_time`, and `duration` attributes allow you to benchmark the performance of the generation.
+
+### The ModelConfiguration Class
+
+You can specify the model configuration by passing a `ModelConfiguration` object to the generation functions.
+
+```python
+from limin import ModelConfiguration
+
+model_configuration = ModelConfiguration(
+    model="gpt-4o",
+    temperature=0.7,
+    log_probs=True,
+    top_log_probs=10,
+)
+
+completion = await generate_text_completion(
+    "What is 2+2?",
+    model_configuration=model_configuration,
+)
+print(completion.content)
+```
+
+You can find the full example in the [`examples/model_configuration.py`](examples/model_configuration.py) file.

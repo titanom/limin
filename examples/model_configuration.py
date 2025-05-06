@@ -1,3 +1,4 @@
+import asyncio
 from limin import generate_text_completion, ModelConfiguration
 
 
@@ -15,9 +16,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    import asyncio
-    import dotenv
-
-    dotenv.load_dotenv()
-
     asyncio.run(main())
