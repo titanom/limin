@@ -12,23 +12,22 @@ class GetWeatherParameters(BaseModel):
     location: str = Field(description="City and country e.g. Bogotá, Colombia")
 
 
+get_weather_tool = Tool(
+    name="get_weather",
+    description="Get current temperature for provided location in celsius.",
+    parameters=GetWeatherParameters,
+)
+
+
 messages = Conversation(
     messages=[Message(role="user", content="What's the weather like in Paris today?")]
 )
 
-print(GetWeatherParameters.model_json_schema())
-
 
 async def main():
     completion = await generate_tool_call_completion(
-        messages,
-        [
-            Tool(
-                name="get_weather",
-                description="Get current temperature for provided coordinates in celsius.",
-                parameters=GetWeatherParameters,
-            )
-        ],
+        "What's the weather like in Paris today?",
+        get_weather_tool,
     )
     print(completion)
 
