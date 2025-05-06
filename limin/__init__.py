@@ -21,6 +21,12 @@ from .structured_completion import (
     generate_structured_completions,
 )
 
+from .tool_call import (
+    Tool,
+    ToolCall,
+    generate_tool_call_completion,
+)
+
 __all__ = [
     # From base
     "Message",
@@ -39,4 +45,8 @@ __all__ = [
     "generate_structured_completion",
     "generate_structured_completions_for_conversations",
     "generate_structured_completions",
+    # From tool_call
+    "Tool",
+    "ToolCall",
+    "generate_tool_call_completion",
 ]
