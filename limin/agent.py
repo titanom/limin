@@ -1,7 +1,7 @@
 from typing import list
-from .models import Tool, ToolMessage, UserMessage, AssistantMessage
+from .base import Tool, ToolMessage, UserMessage, AssistantMessage
 from .base import Conversation, ModelConfiguration
-from .completion import generate_text_completion_for_conversation
+from .text_completion import generate_text_completion_for_conversation
 from .tool_call import generate_tool_call_completion_for_conversation
 
 

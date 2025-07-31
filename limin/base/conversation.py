@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from .message import Message, SystemMessage, UserMessage, AssistantMessage
-from .models_util import get_last_element
+from .base_util import get_last_element
 from openai.types.chat import ChatCompletionMessageParam
 
 

@@ -7,7 +7,7 @@ from .base import (
     ModelConfiguration,
 )
 
-from .completion import (
+from .text_completion import (
     generate_text_completion_for_conversation,
     generate_text_completion,
     generate_text_completions_for_conversations,

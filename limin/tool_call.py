@@ -3,7 +3,13 @@ import time
 import typing
 from openai import AsyncOpenAI
 
-from .base import DEFAULT_MODEL_CONFIGURATION, Conversation, ModelConfiguration
+from .base import (
+    DEFAULT_MODEL_CONFIGURATION,
+    Conversation,
+    ModelConfiguration,
+    Tool,
+    ToolCall,
+)
 from pydantic import BaseModel
 
 
@@ -43,7 +49,7 @@ async def generate_tool_call_completion_for_conversation(
         base_url=model_configuration.base_url,
     )
 
-    openai_tools = [tool_to_openai_tool(tool) for tool in tools]
+    openai_tools = [tool.openai_tool for tool in tools]
 
     start_time = time.time()
     completion = await client.chat.completions.create(

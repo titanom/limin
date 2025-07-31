@@ -1,5 +1,6 @@
 import asyncio
 import time
+from typing import TypeVar
 from openai import AsyncOpenAI
 from tqdm import tqdm
 
@@ -11,6 +12,8 @@ from .base import (
     get_first_element,
     parse_logprobs,
 )
+
+T = TypeVar("T")
 
 
 async def generate_text_completion_for_conversation(

@@ -1,19 +1,18 @@
-from .conversation import Conversation
-from .token import TokenLogProb, format_token_log_probs
-from .message import AssistantMessage
+from typing import Generic, TypeVar
 from pydantic import BaseModel
+from .conversation import Conversation
+from .logprobs import TokenLogProb, format_token_log_probs
+from .message import AssistantMessage
+
+T = TypeVar("T")
 
 
-class TextCompletion(BaseModel):
+class StructuredCompletion(BaseModel, Generic[T]):
     conversation: Conversation
     model: str
-    content: str
+    content: T
     start_time: float
     end_time: float
-
-    """
-    A list containing the most likely tokens and their log probabilities for each token position in the message.
-    """
     full_token_log_probs: list[list[TokenLogProb]] | None = None
 
     @property
@@ -32,12 +31,6 @@ class TextCompletion(BaseModel):
         ]
 
     def to_pretty_log_probs_string(self, show_probabilities: bool = False) -> str:
-        """
-        Returns a pretty string representation of the token log probabilities.
-        Tokens are colored from dark red (low probability) to dark green (high probability).
-
-        :param show_probabilities: Whether to show the probability value after each token.
-        """
         if self.token_log_probs is None:
             return "No token log probabilities available."
 
@@ -46,6 +39,6 @@ class TextCompletion(BaseModel):
     def to_assistant_message(self) -> AssistantMessage:
         return AssistantMessage(
             role="assistant",
-            content=self.content,
+            content=str(self.content),
             tool_calls=None,
         )
