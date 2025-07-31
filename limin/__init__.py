@@ -73,4 +73,4 @@ __all__ = [
     "generate_tool_call_completion",
 ]
 
-__version__ = "0.9.0"
+__version__ = "0.9.1"
