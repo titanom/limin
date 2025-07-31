@@ -7,7 +7,8 @@ OpenAI function-/tool-calling spec (openai-python ≥ 1.0).
 """
 
 from __future__ import annotations
-import json, os
+import json
+import os
 from openai import OpenAI
 
 # ── 0 · client ────────────────────────────────────────────────────────────────

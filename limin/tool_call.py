@@ -1,6 +1,5 @@
 import json
 import time
-import typing
 from openai import AsyncOpenAI
 
 from .base import (

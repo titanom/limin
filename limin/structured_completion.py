@@ -65,7 +65,6 @@ async def generate_structured_completion_for_conversation(
     full_token_log_probs = parse_logprobs(first_choice)
 
     return StructuredCompletion(
-        conversation=conversation,
         model=model_configuration.model,
         content=message_content,
         start_time=start_time,

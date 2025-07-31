@@ -1,4 +1,4 @@
-from limin import Tool, generate_tool_call_completion, generate_text_completion
+from limin import Tool, generate_tool_call_completion
 from pydantic import BaseModel, Field
 
 

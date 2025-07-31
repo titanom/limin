@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Literal, Optional, Union, cast
+from typing import Literal, Optional, cast
 from openai.types.chat import (
     ChatCompletionMessageParam,
     ChatCompletionMessageToolCall,
@@ -63,7 +63,7 @@ class ToolCall(BaseModel):
 class AssistantMessage(BaseModel):
     role: Literal["assistant"] = "assistant"
     content: Optional[str]
-    tool_calls: list[ToolCall]
+    tool_calls: Optional[list[ToolCall]] = None
 
     @property
     def openai_message(self) -> ChatCompletionMessageParam:
@@ -74,7 +74,9 @@ class AssistantMessage(BaseModel):
                 "content": self.content,
                 "tool_calls": [
                     tool_call.openai_tool_call for tool_call in self.tool_calls
-                ],
+                ]
+                if self.tool_calls
+                else None,
             },
         )
 

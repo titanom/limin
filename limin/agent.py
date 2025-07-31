@@ -1,4 +1,3 @@
-from typing import list
 from .base import Tool, ToolMessage, UserMessage, AssistantMessage
 from .base import Conversation, ModelConfiguration
 from .text_completion import generate_text_completion_for_conversation

@@ -1,11 +1,9 @@
-from .conversation import Conversation
 from .logprobs import TokenLogProb, format_token_log_probs
 from .message import AssistantMessage
 from pydantic import BaseModel
 
 
 class TextCompletion(BaseModel):
-    conversation: Conversation
     model: str
     content: str
     start_time: float

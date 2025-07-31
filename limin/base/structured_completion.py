@@ -1,6 +1,5 @@
 from typing import Generic, TypeVar
 from pydantic import BaseModel
-from .conversation import Conversation
 from .logprobs import TokenLogProb, format_token_log_probs
 from .message import AssistantMessage
 
@@ -8,7 +7,6 @@ T = TypeVar("T")
 
 
 class StructuredCompletion(BaseModel, Generic[T]):
-    conversation: Conversation
     model: str
     content: T
     start_time: float

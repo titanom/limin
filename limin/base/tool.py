@@ -1,29 +1,41 @@
-from abc import ABC, abstractmethod
+from typing import Callable
+import typing
 from pydantic import BaseModel
 from openai.types.chat import ChatCompletionToolParam
-from openai.types.chat.chat_completion_message_tool_call import Function
 
 
-class Tool(ABC):
-    name: str
-    description: str
-    parameters: type[BaseModel]
+class Tool:
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        parameters: type[BaseModel],
+        exec_fn: Callable[[dict], str] | None = None,
+    ):
+        self.name = name
+        self.description = description
+        self.parameters = parameters
+        self.exec_fn = exec_fn
 
-    @abstractmethod
     def execute(self, **kwargs) -> str:
-        pass
+        if self.exec_fn is None:
+            raise ValueError("Tool has no execution function")
+        return self.exec_fn(**kwargs)
 
     @property
     def openai_tool(self) -> ChatCompletionToolParam:
         model_json_schema = self.parameters.model_json_schema()
         model_json_schema["additionalProperties"] = False
 
-        return ChatCompletionToolParam(
-            type="function",
-            function=Function(
-                name=self.name,
-                description=self.description,
-                parameters=model_json_schema,
-                strict=True,
-            ),
+        return typing.cast(
+            ChatCompletionToolParam,
+            {
+                "type": "function",
+                "function": {
+                    "name": self.name,
+                    "description": self.description,
+                    "parameters": model_json_schema,
+                },
+                "strict": True,
+            },
         )

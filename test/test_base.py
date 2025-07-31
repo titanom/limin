@@ -188,10 +188,7 @@ def test_conversation_from_prompts_user_assistant_system_prompt():
 
 
 def create_text_completion():
-    conversation = Conversation.from_prompts("Hello", "Hi there")
-
     return TextCompletion(
-        conversation=conversation,
         model="gpt-4o",
         content="Test content",
         start_time=100.0,
@@ -210,10 +207,7 @@ def create_text_completion():
 
 
 def create_structured_completion():
-    conversation = Conversation.from_prompts("Hello", "Hi there")
-
     return StructuredCompletion(
-        conversation=conversation,
         model="gpt-4o",
         content={"key": "value"},
         start_time=100.0,
