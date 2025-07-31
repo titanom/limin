@@ -67,3 +67,5 @@ __all__ = [
     "generate_structured_completions",
     "generate_tool_call_completion",
 ]
+
+__version__ = "0.9.0"

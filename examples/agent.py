@@ -6,7 +6,7 @@ from limin import Tool, Agent, ModelConfiguration
 
 
 class GetWeatherParameters(BaseModel):
-    location: str = Field(description="City and country e.g. Bogotá, Colombia")
+    location: str = Field(description="City and country e.g. Munich, Germany")
 
 
 def get_weather_exec(location: str) -> str:
@@ -24,20 +24,20 @@ get_weather_tool = Tool(
 
 class GetCalculatorParameters(BaseModel):
     operation: str = Field(
-        description="Operation to perform e.g. add, subtract, multiply, divide"
+        description="Operation to perform - with +, -, *, / (e.g. 2*2)"
     )
     operator1: int = Field(description="First number to perform the operation on")
     operator2: int = Field(description="Second number to perform the operation on")
 
 
 def get_calculator_exec(operation: str, operator1: int, operator2: int) -> str:
-    if operation == "add":
+    if operation == "+":
         return str(operator1 + operator2)
-    elif operation == "subtract":
+    elif operation == "-":
         return str(operator1 - operator2)
-    elif operation == "multiply":
+    elif operation == "*":
         return str(operator1 * operator2)
-    elif operation == "divide":
+    elif operation == "/":
         if operator2 == 0:
             return "Error: Division by zero"
         return str(operator1 / operator2)
@@ -54,22 +54,26 @@ get_calculator_tool = Tool(
 
 
 async def main():
-    model_config = ModelConfiguration()
+    model_configuration = ModelConfiguration(model="gpt-4o", temperature=1.0)
     agent = Agent(
+        system_prompt="You are a helpful assistant.",
         tools=[get_weather_tool, get_calculator_tool],
-        model_configuration=model_config,
+        model_configuration=model_configuration,
     )
 
-    await agent.respond("What's the weather like in Paris today?")
+    messages = await agent.process("How are you?")
+    print(f"{messages[-1].role}: {messages[-1].content}")
+
+    messages = await agent.process("What's the weather like in Paris today?")
     print("Agent conversation after weather query:")
-    for message in agent.conversation.messages:
+    for message in messages:
         print(f"{message.role}: {message.content}")
 
     print("\n" + "=" * 50 + "\n")
 
-    await agent.respond("What's the result of 2+2?")
+    messages = await agent.process("What's the result of 2+2?")
     print("Agent conversation after calculator query:")
-    for message in agent.conversation.messages:
+    for message in messages:
         print(f"{message.role}: {message.content}")
 
 

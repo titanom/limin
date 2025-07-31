@@ -1,5 +1,7 @@
 # limin
 
+TODO: Central philosophy = everything should be inspectable, limin doesnt try to hide from you
+
 A Python library for interacting with OpenAI-compatible LLM APIs.
 
 Features:

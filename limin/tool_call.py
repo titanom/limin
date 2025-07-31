@@ -68,7 +68,12 @@ async def generate_tool_call_completion_for_conversation(
 
     openai_tool_calls = completion.choices[0].message.tool_calls
     if openai_tool_calls is None:
-        raise ValueError("No tool calls found in the completion.")
+        return ToolCallCompletion(
+            conversation=conversation,
+            start_time=start_time,
+            end_time=end_time,
+            tool_calls=[],
+        )
 
     tool_calls = [
         ToolCall(

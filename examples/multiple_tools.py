@@ -6,7 +6,7 @@ from limin import Tool, generate_tool_call_completion
 
 
 class GetWeatherParameters(BaseModel):
-    location: str = Field(description="City and country e.g. Bogotá, Colombia")
+    location: str = Field(description="City and country e.g. Munich, Germany")
 
 
 get_weather_tool = Tool(
