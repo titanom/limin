@@ -1,12 +1,23 @@
 from .agent import Agent
 
 from .base import (
-    Message,
-    TokenLogProb,
+    get_first_element,
+    get_last_element,
     Conversation,
-    TextCompletion,
-    StructuredCompletion,
+    TokenLogProb,
+    format_token_log_probs,
+    parse_logprobs,
+    Message,
+    SystemMessage,
+    UserMessage,
+    AssistantMessage,
+    ToolMessage,
+    ToolCall,
     ModelConfiguration,
+    DEFAULT_MODEL_CONFIGURATION,
+    StructuredCompletion,
+    TextCompletion,
+    Tool,
 )
 
 from .text_completion import (
@@ -24,33 +35,35 @@ from .structured_completion import (
 )
 
 from .tool_call import (
-    Tool,
-    ToolCall,
     generate_tool_call_completion,
 )
 
 __all__ = [
-    # From agent
     "Agent",
-    # From base
-    "Message",
-    "TokenLogProb",
+    "get_first_element",
+    "get_last_element",
     "Conversation",
-    "TextCompletion",
-    "StructuredCompletion",
+    "TokenLogProb",
+    "format_token_log_probs",
+    "parse_logprobs",
+    "Message",
+    "SystemMessage",
+    "UserMessage",
+    "AssistantMessage",
+    "ToolMessage",
+    "ToolCall",
     "ModelConfiguration",
-    # From completion
+    "DEFAULT_MODEL_CONFIGURATION",
+    "StructuredCompletion",
+    "TextCompletion",
+    "Tool",
     "generate_text_completion_for_conversation",
     "generate_text_completion",
     "generate_text_completions_for_conversations",
     "generate_text_completions",
-    # From structured_completion
     "generate_structured_completion_for_conversation",
     "generate_structured_completion",
     "generate_structured_completions_for_conversations",
     "generate_structured_completions",
-    # From tool_call
-    "Tool",
-    "ToolCall",
     "generate_tool_call_completion",
 ]
