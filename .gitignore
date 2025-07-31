@@ -3,3 +3,4 @@ __pycache__
 .ruff_cache
 dist
 *.egg-info
+.ipynb_checkpoints

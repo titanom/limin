@@ -1,6 +1,11 @@
 # limin
 
-A Python library for interacting with OpenAI-compatible LLM APIs.
+The `limin` library is a Python library for interacting with OpenAI-compatible LLM APIs.
+
+The central philosophy of `limin` is that interactions with LLMs are a **leaky abstraction**.
+This is why `limin` is designed to be as transparent as possible.
+You can inspect every object and trace every operation.
+The library doesn't try to hide the low-level details behind fancy abstractions - you are in control.
 
 Features:
 
@@ -17,6 +22,8 @@ Features:
 ✅ Full structured completion support.
 
 ✅ Tool call support.
+
+✅ Agentic workflows.
 
 ## Installation
 
@@ -279,6 +286,12 @@ print(completion.full_token_log_probs)
 This will return a list of lists of `TokenLogProb` objects (for each token position the `top_log_probs` number of most likely tokens).
 
 You can find the full example in the [`examples/log_probabilities.py`](examples/log_probabilities.py) file.
+
+## Agentic Workflows
+
+You can use the `Agent` class to create agentic workflows.
+
+You can find an example in the [`examples/agent.py`](examples/agent.py) file and an example notebook in the [`notebooks/agent.ipynb`](notebooks/agent.ipynb) file.
 
 ## Important Classes
 

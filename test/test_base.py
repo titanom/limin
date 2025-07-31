@@ -2,15 +2,17 @@ import pytest
 
 from limin import (
     Conversation,
-    Message,
     TextCompletion,
     TokenLogProb,
     StructuredCompletion,
+    UserMessage,
+    SystemMessage,
+    AssistantMessage,
 )
 
 
 def test_message_openai_message():
-    message = Message(role="user", content="Test message")
+    message = UserMessage(content="Test message")
     openai_message = message.openai_message
 
     assert isinstance(openai_message, dict)
@@ -29,22 +31,22 @@ def test_token_log_prob_prob():
 def test_conversation_add_message():
     conversation = Conversation()
 
-    system_message = Message(role="system", content="System prompt")
+    system_message = SystemMessage(content="System prompt")
     conversation.add_message(system_message)
     assert len(conversation.messages) == 1
     assert conversation.messages[0].role == "system"
 
-    user_message = Message(role="user", content="Hello")
+    user_message = UserMessage(content="Hello")
     conversation.add_message(user_message)
     assert len(conversation.messages) == 2
     assert conversation.messages[1].role == "user"
 
-    assistant_message = Message(role="assistant", content="Hi there")
+    assistant_message = AssistantMessage(content="Hi there")
     conversation.add_message(assistant_message)
     assert len(conversation.messages) == 3
     assert conversation.messages[2].role == "assistant"
 
-    user_message2 = Message(role="user", content="How are you?")
+    user_message2 = UserMessage(content="How are you?")
     conversation.add_message(user_message2)
     assert len(conversation.messages) == 4
     assert conversation.messages[3].role == "user"
@@ -52,36 +54,36 @@ def test_conversation_add_message():
 
 def test_conversation_add_message_invalid_first_message():
     conversation = Conversation()
-    assistant_message = Message(role="assistant", content="Invalid first message")
+    assistant_message = AssistantMessage(content="Invalid first message")
     with pytest.raises(ValueError):
         conversation.add_message(assistant_message)
 
 
 def test_conversation_add_message_invalid_message_sequence_user_user():
     conversation = Conversation()
-    conversation.add_message(Message(role="user", content="Hello"))
+    conversation.add_message(UserMessage(content="Hello"))
     with pytest.raises(ValueError):
-        conversation.add_message(Message(role="user", content="Hi there"))
+        conversation.add_message(UserMessage(content="Hi there"))
 
 
 def test_conversation_add_message_invalid_message_sequence_assistant_assistant():
     conversation = Conversation()
-    conversation.add_message(Message(role="user", content="Hello"))
-    conversation.add_message(Message(role="assistant", content="Hi there"))
+    conversation.add_message(UserMessage(content="Hello"))
+    conversation.add_message(AssistantMessage(content="Hi there"))
     with pytest.raises(ValueError):
-        conversation.add_message(Message(role="assistant", content="Hi there"))
+        conversation.add_message(AssistantMessage(content="Hi there"))
 
 
 def test_conversation_to_pretty_string():
     conversation = Conversation()
 
-    system_message = Message(role="system", content="System prompt")
+    system_message = SystemMessage(content="System prompt")
     conversation.add_message(system_message)
 
-    user_message = Message(role="user", content="Hello")
+    user_message = UserMessage(content="Hello")
     conversation.add_message(user_message)
 
-    assistant_message = Message(role="assistant", content="Hi there")
+    assistant_message = AssistantMessage(content="Hi there")
     conversation.add_message(assistant_message)
 
     pretty_string = conversation.to_pretty_string()
@@ -105,13 +107,13 @@ Hi there"""
 def test_conversation_to_markdown():
     conversation = Conversation()
 
-    system_message = Message(role="system", content="System prompt")
+    system_message = SystemMessage(content="System prompt")
     conversation.add_message(system_message)
 
-    user_message = Message(role="user", content="Hello")
+    user_message = UserMessage(content="Hello")
     conversation.add_message(user_message)
 
-    assistant_message = Message(role="assistant", content="Hi there")
+    assistant_message = AssistantMessage(content="Hi there")
     conversation.add_message(assistant_message)
 
     markdown_string = conversation.to_markdown()
@@ -132,13 +134,13 @@ Hi there"""
 def test_conversation_openai_messages():
     conversation = Conversation()
 
-    system_message = Message(role="system", content="System prompt")
+    system_message = SystemMessage(content="System prompt")
     conversation.add_message(system_message)
 
-    user_message = Message(role="user", content="Hello")
+    user_message = UserMessage(content="Hello")
     conversation.add_message(user_message)
 
-    assistant_message = Message(role="assistant", content="Hi there")
+    assistant_message = AssistantMessage(content="Hi there")
     conversation.add_message(assistant_message)
 
     openai_messages = conversation.openai_messages
@@ -146,7 +148,11 @@ def test_conversation_openai_messages():
     assert len(openai_messages) == 3
     assert openai_messages[0] == {"role": "system", "content": "System prompt"}
     assert openai_messages[1] == {"role": "user", "content": "Hello"}
-    assert openai_messages[2] == {"role": "assistant", "content": "Hi there"}
+    assert openai_messages[2] == {
+        "role": "assistant",
+        "content": "Hi there",
+        "tool_calls": None,
+    }
 
 
 def test_conversation_from_prompts_user_prompt():
@@ -188,10 +194,7 @@ def test_conversation_from_prompts_user_assistant_system_prompt():
 
 
 def create_text_completion():
-    conversation = Conversation.from_prompts("Hello", "Hi there")
-
     return TextCompletion(
-        conversation=conversation,
         model="gpt-4o",
         content="Test content",
         start_time=100.0,
@@ -210,10 +213,7 @@ def create_text_completion():
 
 
 def create_structured_completion():
-    conversation = Conversation.from_prompts("Hello", "Hi there")
-
     return StructuredCompletion(
-        conversation=conversation,
         model="gpt-4o",
         content={"key": "value"},
         start_time=100.0,

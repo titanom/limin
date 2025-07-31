@@ -1,22 +1,15 @@
 import json
 import time
-import typing
 from openai import AsyncOpenAI
-from openai.types.chat import ChatCompletionToolParam
-from .base import DEFAULT_MODEL_CONFIGURATION, Conversation, ModelConfiguration
+
+from .base import (
+    DEFAULT_MODEL_CONFIGURATION,
+    Conversation,
+    ModelConfiguration,
+    Tool,
+    ToolCall,
+)
 from pydantic import BaseModel
-
-
-class Tool(BaseModel):
-    name: str
-    description: str
-    parameters: type[BaseModel]
-
-
-class ToolCall(BaseModel):
-    id: str
-    name: str
-    arguments: dict
 
 
 class ToolCallCompletion(BaseModel):
@@ -24,24 +17,6 @@ class ToolCallCompletion(BaseModel):
     start_time: float
     end_time: float
     tool_calls: list[ToolCall]
-
-
-def tool_to_openai_tool(tool: Tool) -> ChatCompletionToolParam:
-    model_json_schema = tool.parameters.model_json_schema()
-    model_json_schema["additionalProperties"] = False
-
-    return typing.cast(
-        ChatCompletionToolParam,
-        {
-            "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description,
-                "parameters": model_json_schema,
-            },
-            "strict": True,
-        },
-    )
 
 
 async def generate_tool_call_completion_for_conversation(
@@ -73,7 +48,7 @@ async def generate_tool_call_completion_for_conversation(
         base_url=model_configuration.base_url,
     )
 
-    openai_tools = [tool_to_openai_tool(tool) for tool in tools]
+    openai_tools = [tool.openai_tool for tool in tools]
 
     start_time = time.time()
     completion = await client.chat.completions.create(
@@ -93,7 +68,12 @@ async def generate_tool_call_completion_for_conversation(
 
     openai_tool_calls = completion.choices[0].message.tool_calls
     if openai_tool_calls is None:
-        raise ValueError("No tool calls found in the completion.")
+        return ToolCallCompletion(
+            conversation=conversation,
+            start_time=start_time,
+            end_time=end_time,
+            tool_calls=[],
+        )
 
     tool_calls = [
         ToolCall(

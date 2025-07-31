@@ -1,18 +1,19 @@
 import asyncio
 import time
-from typing import Type
+from typing import Type, TypeVar
 from openai import AsyncOpenAI
 from tqdm import tqdm
 
 from .base import (
     DEFAULT_MODEL_CONFIGURATION,
-    T,
     Conversation,
     ModelConfiguration,
     StructuredCompletion,
     get_first_element,
     parse_logprobs,
 )
+
+T = TypeVar("T")
 
 
 async def generate_structured_completion_for_conversation(
@@ -64,7 +65,6 @@ async def generate_structured_completion_for_conversation(
     full_token_log_probs = parse_logprobs(first_choice)
 
     return StructuredCompletion(
-        conversation=conversation,
         model=model_configuration.model,
         content=message_content,
         start_time=start_time,
