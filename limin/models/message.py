@@ -1,14 +1,23 @@
-import json
-import typing
 from pydantic import BaseModel
-from typing import Literal, Optional, cast
+from typing import Literal, Optional, Union, cast
 from openai.types.chat import (
     ChatCompletionMessageParam,
     ChatCompletionMessageToolCall,
-    ChatCompletionToolParam,
 )
 from openai.types.chat.chat_completion_message_tool_call import Function
-from abc import ABC, abstractmethod
+import json
+
+
+class SystemMessage(BaseModel):
+    role: Literal["system"] = "system"
+    content: str
+
+    @property
+    def openai_message(self) -> ChatCompletionMessageParam:
+        return ChatCompletionMessageParam(
+            role=self.role,
+            content=self.content,
+        )
 
 
 class UserMessage(BaseModel):
@@ -17,8 +26,9 @@ class UserMessage(BaseModel):
 
     @property
     def openai_message(self) -> ChatCompletionMessageParam:
-        return cast(
-            ChatCompletionMessageParam, {"role": self.role, "content": self.content}
+        return ChatCompletionMessageParam(
+            role=self.role,
+            content=self.content,
         )
 
 
@@ -62,26 +72,4 @@ class ToolMessage(BaseModel):
         )
 
 
-class Tool(ABC):
-    name: str
-    description: str
-    parameters: type[BaseModel]
-
-    @abstractmethod
-    def execute(self, **kwargs) -> str:
-        pass
-
-
-def tool_to_openai_tool(tool: Tool) -> ChatCompletionToolParam:
-    model_json_schema = tool.parameters.model_json_schema()
-    model_json_schema["additionalProperties"] = False
-
-    return ChatCompletionToolParam(
-        type="function",
-        function=Function(
-            name=tool.name,
-            description=tool.description,
-            parameters=model_json_schema,
-            strict=True,
-        ),
-    )
+Message = Union[SystemMessage | UserMessage | AssistantMessage | ToolMessage]
