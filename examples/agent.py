@@ -26,32 +26,23 @@ class GetCalculatorParameters(BaseModel):
     operation: str = Field(
         description="Operation to perform e.g. add, subtract, multiply, divide"
     )
-    numbers: list[int] = Field(
-        description="List of numbers to perform the operation on"
-    )
+    operator1: int = Field(description="First number to perform the operation on")
+    operator2: int = Field(description="Second number to perform the operation on")
 
 
-def get_calculator_exec(operation: str, numbers: list[int]) -> str:
+def get_calculator_exec(operation: str, operator1: int, operator2: int) -> str:
     if operation == "add":
-        result = sum(numbers)
+        return str(operator1 + operator2)
     elif operation == "subtract":
-        result = numbers[0]
-        for num in numbers[1:]:
-            result -= num
+        return str(operator1 - operator2)
     elif operation == "multiply":
-        result = 1
-        for num in numbers:
-            result *= num
+        return str(operator1 * operator2)
     elif operation == "divide":
-        result = numbers[0]
-        for num in numbers[1:]:
-            if num == 0:
-                return "Error: Division by zero"
-            result /= num
+        if operator2 == 0:
+            return "Error: Division by zero"
+        return str(operator1 / operator2)
     else:
         return f"Error: Unknown operation '{operation}'"
-
-    return str(result)
 
 
 get_calculator_tool = Tool(

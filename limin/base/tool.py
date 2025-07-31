@@ -10,7 +10,7 @@ class Tool:
         name: str,
         description: str,
         parameters: type[BaseModel],
-        exec_fn: Callable[[dict], str] | None = None,
+        exec_fn: Callable[..., str] | None = None,
     ):
         self.name = name
         self.description = description
