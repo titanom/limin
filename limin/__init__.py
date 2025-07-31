@@ -39,7 +39,9 @@ from .tool_call import (
 )
 
 __all__ = [
+    # from agent
     "Agent",
+    # from base
     "get_first_element",
     "get_last_element",
     "Conversation",
@@ -57,14 +59,17 @@ __all__ = [
     "StructuredCompletion",
     "TextCompletion",
     "Tool",
+    # from text_completion
     "generate_text_completion_for_conversation",
     "generate_text_completion",
     "generate_text_completions_for_conversations",
     "generate_text_completions",
+    # from structured_completion
     "generate_structured_completion_for_conversation",
     "generate_structured_completion",
     "generate_structured_completions_for_conversations",
     "generate_structured_completions",
+    # from tool_call
     "generate_tool_call_completion",
 ]
 
