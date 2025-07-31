@@ -4,6 +4,8 @@ from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat.chat_completion import Choice
 from pydantic import BaseModel, Field
 
+from .models import AssistantMessage
+
 T = TypeVar("T")
 
 
@@ -195,6 +197,13 @@ class TextCompletion(BaseModel):
 
         return format_token_log_probs(self.token_log_probs, show_probabilities)
 
+    def to_assistant_message(self) -> AssistantMessage:
+        return AssistantMessage(
+            role="assistant",
+            content=self.content,
+            tool_calls=None,
+        )
+
 
 class StructuredCompletion(BaseModel, Generic[T]):
     conversation: Conversation
@@ -224,6 +233,13 @@ class StructuredCompletion(BaseModel, Generic[T]):
             return "No token log probabilities available."
 
         return format_token_log_probs(self.token_log_probs, show_probabilities)
+
+    def to_assistant_message(self) -> AssistantMessage:
+        return AssistantMessage(
+            role="assistant",
+            content=str(self.content),
+            tool_calls=None,
+        )
 
 
 def parse_logprobs(first_choice: Choice) -> list[list[TokenLogProb]] | None:
