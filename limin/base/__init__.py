@@ -1,7 +1,14 @@
 from .base_util import get_first_element, get_last_element
 from .conversation import Conversation
 from .logprobs import TokenLogProb, format_token_log_probs, parse_logprobs
-from .message import Message, SystemMessage, UserMessage, AssistantMessage, ToolCall
+from .message import (
+    Message,
+    SystemMessage,
+    UserMessage,
+    AssistantMessage,
+    ToolMessage,
+    ToolCall,
+)
 from .model_configuration import ModelConfiguration, DEFAULT_MODEL_CONFIGURATION
 from .structured_completion import StructuredCompletion
 from .text_completion import TextCompletion
@@ -22,6 +29,7 @@ __all__ = [
     "SystemMessage",
     "UserMessage",
     "AssistantMessage",
+    "ToolMessage",
     "ToolCall",
     # From model_configuration
     "ModelConfiguration",

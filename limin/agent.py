@@ -28,7 +28,7 @@ class Agent:
 
             for tool_call in tool_call_completion.tool_calls:
                 # Get the tool with the correct ID
-                tool = next(tool for tool in self.tools if tool.id == tool_call.id)
+                tool = next(tool for tool in self.tools if tool.name == tool_call.name)
 
                 # Execute the tool
                 content = tool.execute(**tool_call.arguments)

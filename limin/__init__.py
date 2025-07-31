@@ -1,3 +1,5 @@
+from .agent import Agent
+
 from .base import (
     Message,
     TokenLogProb,
@@ -28,6 +30,8 @@ from .tool_call import (
 )
 
 __all__ = [
+    # From agent
+    "Agent",
     # From base
     "Message",
     "TokenLogProb",

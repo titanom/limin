@@ -20,8 +20,10 @@ class Conversation(BaseModel):
         if last_message.role == "system" and message.role != "user":
             raise ValueError("System message must be followed by a user message")
 
-        if last_message.role == "assistant" and message.role != "user":
-            raise ValueError("Assistant message must be followed by a user message")
+        if last_message.role == "assistant" and message.role not in ["user", "tool"]:
+            raise ValueError(
+                "Assistant message must be followed by a user or tool message"
+            )
 
         if last_message.role == "user" and message.role != "assistant":
             raise ValueError("User message must be followed by an assistant message")
